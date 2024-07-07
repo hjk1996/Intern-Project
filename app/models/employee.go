@@ -1,8 +1,12 @@
 package models
 
+import (
+	"gorm.io/gorm"
+)
+
 type Employee struct {
-	ID   uint
-	Name string
+	gorm.Model
+	ID       uint `gorm:"primaryKey"`
+	Name     string
+	Articles []Article `gorm:"foreignKey:EmployeeID"`
 }
-
-
