@@ -11,6 +11,7 @@ import (
 	"github.com/hjk1996/LGUPlus-Intern-Project/models"
 )
 
+// 홈화면
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.Header().Set("Content-Type", "text/plain")
@@ -40,6 +41,7 @@ type ArticleBody struct {
 	Content string `json:"content"`
 }
 
+// DB에 article write하는 handler
 func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Content-Type", "text/plain")

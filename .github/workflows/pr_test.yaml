@@ -19,10 +19,10 @@ jobs:
           go-version: 1.21
       
       - name: Install Go dependency
-        working-directory: /app
+        working-directory: ./app
         run: go mod download
       
       - name: Run test
-        working-directory: /app
+        working-directory: ./app
         run: go test ./... -v
 

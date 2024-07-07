@@ -12,9 +12,36 @@ jobs:
     if: github.event.pull_request.merged == true || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
+    env:
+      APP_NAME: intern_project_app
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
+      # AWS credential 설정
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ECR 로그인
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # 도커 이미지 빌드 후 ECR에 푸시
+      - name: Build docker image and push to ECR
+        uses: docker/build-push-action@v3
+        with:
+          context: ./app
+          file: ./app/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.ECR_ADDRESS }}:latest
+            ${{ secrets.ECR_ADDRESS }}:${{ github.run_number }}
