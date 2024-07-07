@@ -4,8 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "app/**"
+
   pull_request:
     types: [closed]
+    paths:
+      - "app/**"
 
 jobs:
   build_and_push:
