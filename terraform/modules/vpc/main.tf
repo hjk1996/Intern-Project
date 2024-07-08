@@ -28,6 +28,8 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 }
 
+
+
 //subnets
 resource "aws_subnet" "public" {
   count             = length(local.azs)
@@ -84,6 +86,32 @@ resource "aws_internet_gateway" "main" {
   }
 
 }
+
+// eip
+resource "aws_eip" "nat" {
+    count = length(aws_subnet.public.*.id)
+    vpc = true
+
+    lifecycle {
+      create_before_destroy = true
+    }
+  
+}
+
+
+// nat gateways
+resource "aws_nat_gateway" "main" {
+    count = length(aws_subnet.public.*.id)
+    allocation_id = element(aws_eip.nat.*.id, count.index)
+    subnet_id = element(aws_subnet.public.*.id, count.index)
+
+    tags = {
+        Name = "${var.project_name}-ngw-${count.index + 1}"
+    }
+    depends_on = [ aws_eip.nat ]
+}
+
+
 
 // route tables and route table associations
 resource "aws_route_table" "public" {
@@ -178,11 +206,4 @@ resource "aws_vpc_endpoint_subnet_association" "cloudwatch" {
   vpc_endpoint_id = aws_vpc_endpoint.cloudwatch.id
   subnet_id = aws_subnet.cloudwatch_endpoint.id
 }
-
-
-
-
-
-
-
 
