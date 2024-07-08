@@ -9,7 +9,6 @@ resource "aws_cloudwatch_log_group" "app" {
 
 
 // log bucket
-
 resource "aws_s3_bucket" "app_log" {
   bucket = "${var.project_name}-app-log-bucket"
 }
@@ -114,5 +113,29 @@ resource "aws_iam_role_policy_attachment" "s3_access" {
 resource "aws_iam_role_policy_attachment" "cloudwatch_log_export" {
   role = aws_iam_role.cloudwatch_log_export_lambda.name
   policy_arn = aws_iam_policy.s3_log_export.arn
+}
+
+data "archive_file" "lambda" {
+    type = "zip"
+    source_file = "${path.module}/lambda_function/lambda_function.py"
+    output_path = "${path.module}/lambda_function.zip"
+}
+
+
+// cloudwatch log를 s3로 export 하기 위한 lambda
+resource "aws_lambda_function" "cloudwatch_log_s3_export" {
+    function_name = "${var.project_name}-cloudwatch-log-s3-export-lambda"
+    filename = "${path.module}/lambda_function.zip"
+    handler = "lambda_function.lambda_handler"
+    role = aws_iam_role.cloudwatch_log_export_lambda.arn
+    source_code_hash = data.archive_file.lambda.output_base64sha256
+
+    runtime = "python3.11"
+
+
+    depends_on = [
+        data.archive_file.lambda
+     ]
+
 }
 
