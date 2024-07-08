@@ -1,0 +1,118 @@
+// cloudwatch log
+
+
+resource "aws_cloudwatch_log_group" "app" {
+  name = "${var.project_name}-application-log-group"
+  // 로그 보존 기간
+  retention_in_days = 7
+}
+
+
+// log bucket
+
+resource "aws_s3_bucket" "app_log" {
+  bucket = "${var.project_name}-app-log-bucket"
+}
+
+
+resource "aws_s3_bucket_lifecycle_configuration" "app_log_config" {
+  bucket = aws_s3_bucket.app_log.id
+
+  rule {
+    id     = "log"
+    status = "Enabled"
+
+    transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+
+    transition {
+      days          = 90
+      storage_class = "GLACIER"
+    }
+
+  }
+}
+
+
+// cloudwatch log에 log를 읽고 쓰기 위한 권한
+resource "aws_iam_policy" "cloudwatch_log" {
+  name        = "${var.project_name}-app-cloudwatch-log-policy"
+  description = "log group에 로그를 남기기 위한 권한"
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "logs:GetLogEvents",
+            "logs:PutLogEvents"
+          ],
+          "Resource" : aws_cloudwatch_log_group.app.arn
+        }
+      ]
+    }
+  )
+}
+
+
+
+
+// cloudwatch log를 s3로 export하기 위해서 필요한 권한
+resource "aws_iam_policy" "s3_log_export" {
+  name        = "${var.project_name}-app-s3-log-export-policy"
+  description = "s3에 log를 export하기 위한 권한"
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "logs:CreateExportTask",
+            "logs:CancelExportTask",
+            "logs:DescribeExportTasks",
+            "logs:DescribeLogStreams",
+            "logs:DescribeLogGroups"
+          ],
+          "Resource" : aws_cloudwatch_log_group.app.arn
+        }
+      ]
+
+    }
+  )
+}
+
+
+// lambda가 cloudwatch log를 s3로 export 하기 위해서 사용하는 iam role
+resource "aws_iam_role" "cloudwatch_log_export_lambda" {
+  name = "${var.project_name}-cloudwatch-log-export-lambda-role"
+  assume_role_policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      Statement : [
+        {
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
+          Sid    = ""
+          Principal = {
+            Service = "lambda.amazonaws.com"
+          }
+        },
+      ]
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "s3_access" {
+  role = aws_iam_role.cloudwatch_log_export_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_log_export" {
+  role = aws_iam_role.cloudwatch_log_export_lambda.name
+  policy_arn = aws_iam_policy.s3_log_export.arn
+}
+

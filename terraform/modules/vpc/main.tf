@@ -90,7 +90,6 @@ resource "aws_internet_gateway" "main" {
 // nat gateway에 public ip 부여를 위해서 필요함
 resource "aws_eip" "nat" {
   count = length(aws_subnet.public.*.id)
-  vpc   = true
 
   lifecycle {
     create_before_destroy = true

@@ -1,5 +1,3 @@
-
-
 terraform {
 
   backend "s3" {
@@ -20,6 +18,7 @@ provider "aws" {
     tags = {
       terraform   = true
       Environment = "prod"
+      Application = "intern-project"
     }
   }
 }
@@ -28,6 +27,13 @@ provider "aws" {
 module "vpc_moudle" {
   source       = "./modules/vpc"
   cidr_block   = var.cidr_block
+  project_name = var.project_name
+}
+
+
+
+module "logging_module" {
+  source       = "./modules/logging"
   project_name = var.project_name
 }
 
