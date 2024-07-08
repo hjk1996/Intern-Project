@@ -88,27 +88,28 @@ resource "aws_internet_gateway" "main" {
 }
 
 // eip
+// nat gateway에 public ip 부여를 위해서 필요함
 resource "aws_eip" "nat" {
-    count = length(aws_subnet.public.*.id)
-    vpc = true
+  count = length(aws_subnet.public.*.id)
+  vpc   = true
 
-    lifecycle {
-      create_before_destroy = true
-    }
-  
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 
 // nat gateways
 resource "aws_nat_gateway" "main" {
-    count = length(aws_subnet.public.*.id)
-    allocation_id = element(aws_eip.nat.*.id, count.index)
-    subnet_id = element(aws_subnet.public.*.id, count.index)
+  count         = length(aws_subnet.public.*.id)
+  allocation_id = element(aws_eip.nat.*.id, count.index)
+  subnet_id     = element(aws_subnet.public.*.id, count.index)
 
-    tags = {
-        Name = "${var.project_name}-ngw-${count.index + 1}"
-    }
-    depends_on = [ aws_eip.nat ]
+  tags = {
+    Name = "${var.project_name}-ngw-${count.index + 1}"
+  }
+  depends_on = [aws_eip.nat]
 }
 
 
@@ -135,23 +136,32 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table" "private" {
+  count  = length(aws_subnet.private_app.*.id)
   vpc_id = aws_vpc.main.id
 
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = element(aws_nat_gateway.main.*.id, count.index)
+  }
+
+
   tags = {
-    Name = "${var.project_name}-private-rt"
+    Name = "${var.project_name}-private-rt-${count.index + 1}"
   }
 
 }
 
 resource "aws_route_table_association" "app" {
   count          = length(aws_subnet.private_app.*.id)
-  route_table_id = aws_route_table.private.id
+  route_table_id = element(aws_route_table.private.*.id, count.index)
   subnet_id      = aws_subnet.private_app[count.index].id
+
 }
 
 resource "aws_route_table_association" "db" {
   count          = length(aws_subnet.private_db.*.id)
-  route_table_id = aws_route_table.private.id
+  route_table_id = element(aws_route_table.private.*.id, count.index)
   subnet_id      = aws_subnet.private_db[count.index].id
 }
 
@@ -204,6 +214,6 @@ resource "aws_vpc_endpoint" "cloudwatch" {
 
 resource "aws_vpc_endpoint_subnet_association" "cloudwatch" {
   vpc_endpoint_id = aws_vpc_endpoint.cloudwatch.id
-  subnet_id = aws_subnet.cloudwatch_endpoint.id
+  subnet_id       = aws_subnet.cloudwatch_endpoint.id
 }
 
