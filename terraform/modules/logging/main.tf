@@ -59,7 +59,7 @@ resource "aws_iam_policy" "cloudwatch_log" {
 
 
 
-// cloudwatch log를 s3로 export하기 위해서 필요한 권한
+// cloudwatch log를 s3로 export하기 위한 Lamba 함수의 iam role policy
 resource "aws_iam_policy" "s3_log_export" {
   name        = "${var.project_name}-app-s3-log-export-policy"
   description = "s3에 log를 export하기 위한 권한"
@@ -77,9 +77,16 @@ resource "aws_iam_policy" "s3_log_export" {
             "logs:DescribeLogGroups"
           ],
           "Resource" : aws_cloudwatch_log_group.app.arn
+        },
+        {
+          "Action" : [
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ],
+          "Effect" : "Allow",
+          "Resource" : "arn:aws:logs:*:*:*"
         }
       ]
-
     }
   )
 }
@@ -106,36 +113,44 @@ resource "aws_iam_role" "cloudwatch_log_export_lambda" {
 }
 
 resource "aws_iam_role_policy_attachment" "s3_access" {
-  role = aws_iam_role.cloudwatch_log_export_lambda.name
+  role       = aws_iam_role.cloudwatch_log_export_lambda.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "cloudwatch_log_export" {
-  role = aws_iam_role.cloudwatch_log_export_lambda.name
+  role       = aws_iam_role.cloudwatch_log_export_lambda.name
   policy_arn = aws_iam_policy.s3_log_export.arn
 }
 
 data "archive_file" "lambda" {
-    type = "zip"
-    source_file = "${path.module}/lambda_function/lambda_function.py"
-    output_path = "${path.module}/lambda_function.zip"
+  type        = "zip"
+  source_file = "${path.module}/lambda_function/lambda_function.py"
+  output_path = "${path.module}/lambda_function.zip"
 }
 
 
 // cloudwatch log를 s3로 export 하기 위한 lambda
 resource "aws_lambda_function" "cloudwatch_log_s3_export" {
-    function_name = "${var.project_name}-cloudwatch-log-s3-export-lambda"
-    filename = "${path.module}/lambda_function.zip"
-    handler = "lambda_function.lambda_handler"
-    role = aws_iam_role.cloudwatch_log_export_lambda.arn
-    source_code_hash = data.archive_file.lambda.output_base64sha256
+  function_name    = "${var.project_name}-cloudwatch-log-s3-export-lambda"
+  filename         = "${path.module}/lambda_function.zip"
+  handler          = "lambda_function.lambda_handler"
+  role             = aws_iam_role.cloudwatch_log_export_lambda.arn
+  source_code_hash = data.archive_file.lambda.output_base64sha256
+  timeout = 120
 
-    runtime = "python3.11"
+  runtime = "python3.11"
+
+  environment {
+    variables = {
+      GROUP_NAME         = aws_cloudwatch_log_group.app.name
+      DESTINATION_BUCKET = aws_s3_bucket.app_log.bucket
+    }
+  }
 
 
-    depends_on = [
-        data.archive_file.lambda
-     ]
+  depends_on = [
+    data.archive_file.lambda
+  ]
 
 }
 
