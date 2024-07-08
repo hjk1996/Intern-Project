@@ -4,12 +4,12 @@ terraform {
 
   backend "s3" {
     bucket = "lguplus-intern-project-tfstate"
-    key = "tfstate"
+    key    = "tfstate"
     region = "ap-northeast-2"
 
   }
 
-  
+
 }
 
 
@@ -18,15 +18,16 @@ provider "aws" {
 
   default_tags {
     tags = {
-        terraform = true
-    }    
+      terraform = true
+    }
   }
 }
 
 
 module "vpc_moudle" {
-  source = "./modules/vpc"
-  
+  source       = "./modules/vpc"
+  cidr_block   = var.cidr_block
+  project_name = var.project_name
 }
 
 
