@@ -14,7 +14,6 @@ locals {
 
 
 
-
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 
@@ -55,12 +54,12 @@ resource "aws_subnet" "private_app" {
 }
 
 
-resource "aws_subnet" "cloudwatch_endpoint" {
+resource "aws_subnet" "interface_endpoint" {
   vpc_id            = aws_vpc.main.id
   availability_zone = local.azs[0]
   cidr_block        = cidrsubnet(var.cidr_block, 8, 100 + length(local.azs))
   tags = {
-    Name = "${var.project_name}-cloudwatch-endpoint-subnet"
+    Name = "${var.project_name}-interface-endpoint-subnet"
   }
 }
 
@@ -167,7 +166,7 @@ resource "aws_route_table_association" "db" {
 
 
 // cloudwatch vpc endpoint
-resource "aws_security_group" "apigateway_vpc_endpoint_sg" {
+resource "aws_security_group" "cloudwatch_vpc_endpoint" {
   name   = "${var.project_name}-cloudwatch-logs-vpc-endpoint-sg"
   vpc_id = aws_vpc.main.id
   ingress {
@@ -200,7 +199,7 @@ resource "aws_vpc_endpoint" "cloudwatch" {
 
 
   security_group_ids = [
-    aws_security_group.apigateway_vpc_endpoint_sg.id
+    aws_security_group.cloudwatch_vpc_endpoint.id
   ]
 
   private_dns_enabled = true
@@ -214,6 +213,59 @@ resource "aws_vpc_endpoint" "cloudwatch" {
 
 resource "aws_vpc_endpoint_subnet_association" "cloudwatch" {
   vpc_endpoint_id = aws_vpc_endpoint.cloudwatch.id
-  subnet_id       = aws_subnet.cloudwatch_endpoint.id
+  subnet_id       = aws_subnet.interface_endpoint.id
 }
+
+// secret manager vpc endpoint
+
+resource "aws_security_group" "secret_manager_vpc_endpoint" {
+  name   = "${var.project_name}-secret-manager-vpc-endpoint-sg"
+  vpc_id = aws_vpc.main.id
+  ingress {
+    from_port = 443
+    to_port   = 443
+    protocol  = "TCP"
+
+    cidr_blocks = [
+      aws_vpc.main.cidr_block
+    ]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+    description = "Internal outbound any traffic"
+  }
+
+  tags = {
+    Name = "secret-manager-vpc-endpoint-sg"
+  }
+}
+
+resource "aws_vpc_endpoint" "secret_manager" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.secretsmanager"
+  vpc_endpoint_type = "Interface"
+
+
+  security_group_ids = [
+    aws_security_group.secret_manager_vpc_endpoint.id
+  ]
+
+  private_dns_enabled = true
+  auto_accept         = true
+
+  tags = {
+    Name = "${var.project_name}-secret-manager-vpc-endpoint"
+  }
+
+}
+
+resource "aws_vpc_endpoint_subnet_association" "secret_manager" {
+  vpc_endpoint_id = aws_vpc_endpoint.secret_manager.id
+  subnet_id       = aws_subnet.interface_endpoint.id
+}
+
 
