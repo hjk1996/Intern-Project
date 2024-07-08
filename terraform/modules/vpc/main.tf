@@ -268,4 +268,55 @@ resource "aws_vpc_endpoint_subnet_association" "secret_manager" {
   subnet_id       = aws_subnet.interface_endpoint.id
 }
 
+// ecr enpoint
+
+resource "aws_security_group" "ecr_vpc_endpoint" {
+  name   = "${var.project_name}-ecr-vpc-endpoint-sg"
+  vpc_id = aws_vpc.main.id
+  ingress {
+    from_port = 443
+    to_port   = 443
+    protocol  = "TCP"
+
+    cidr_blocks = [
+      aws_vpc.main.cidr_block
+    ]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+    description = "Internal outbound any traffic"
+  }
+
+  tags = {
+    Name = "ecr-vpc-endpoint-sg"
+  }
+}
+
+resource "aws_vpc_endpoint" "ecr" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.ecr.dkr"
+  vpc_endpoint_type = "Interface"
+
+
+  security_group_ids = [
+    aws_security_group.secret_manager_vpc_endpoint.id
+  ]
+
+  private_dns_enabled = true
+  auto_accept         = true
+
+  tags = {
+    Name = "${var.project_name}-ecr-vpc-endpoint"
+  }
+
+}
+
+resource "aws_vpc_endpoint_subnet_association" "ecr" {
+  vpc_endpoint_id = aws_vpc_endpoint.ecr.id
+  subnet_id       = aws_subnet.interface_endpoint.id
+}
 
