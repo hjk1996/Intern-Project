@@ -1,3 +1,6 @@
+data "aws_region" "current" {
+  
+}
 // DB 서브넷 그룹
 resource "aws_db_subnet_group" "main" {
     name = "${var.project_name}-subnet-group"
@@ -29,6 +32,28 @@ resource "aws_security_group" "db" {
     }
 
   
+}
+
+resource "aws_db_instance" "main" {
+    allocated_storage = 50
+    identifier = "${var.project_name}-db"
+    db_name = "app"
+    db_subnet_group_name = aws_db_subnet_group.main.name
+    engine = "mysql"
+    engine_version = "8.0.35"
+    instance_class = "db.t3.micro"
+    username = "master"
+    availability_zone = "${data.aws_region.current.name}a"
+    vpc_security_group_ids = [
+        aws_security_group.db.id
+    ]
+    manage_master_user_password = true  
+    storage_encrypted = true
+    // db를 삭제하기 전에 스냅샷을 저장할 것인지 여부
+    skip_final_snapshot = true
+    // db parameter에 대한 변경은 다음 maintenance window에 반영되는데, 이걸 설정하면 바로 반영됨 (다운타임 있음)
+    apply_immediately = true
+
 }
 
 
