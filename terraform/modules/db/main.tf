@@ -34,6 +34,9 @@ resource "aws_security_group" "db" {
   
 }
 
+
+
+// AZ 명시적으로 지정해주면 왜 자꾸 replaced되지?
 resource "aws_db_instance" "main" {
     allocated_storage = 50
     identifier = "${var.project_name}-db"
@@ -43,17 +46,18 @@ resource "aws_db_instance" "main" {
     engine_version = "8.0.35"
     instance_class = "db.t3.micro"
     username = "master"
-    availability_zone = "${data.aws_region.current.name}a"
+    manage_master_user_password = true
     vpc_security_group_ids = [
         aws_security_group.db.id
     ]
-    manage_master_user_password = true  
     storage_encrypted = true
     // db를 삭제하기 전에 스냅샷을 저장할 것인지 여부
     skip_final_snapshot = true
     // db parameter에 대한 변경은 다음 maintenance window에 반영되는데, 이걸 설정하면 바로 반영됨 (다운타임 있음)
     apply_immediately = true
-
 }
+
+
+
 
 

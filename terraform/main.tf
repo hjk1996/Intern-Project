@@ -44,7 +44,7 @@ module "db_module" {
   db_instance_class = var.db_instance_class
   db_private_subnet_ids = module.vpc_moudle.db_private_subnet_ids
   cidr_block = var.cidr_block
-
+  db_password = var.db_password
 
   depends_on = [
     module.vpc_moudle

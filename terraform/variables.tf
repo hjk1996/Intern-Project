@@ -21,6 +21,11 @@ variable "db_instance_class" {
 
 
 variable "ssh_key_path" {
+  type = string 
+}
+
+
+variable "db_password" {
   type = string
-  
+  sensitive = true
 }
