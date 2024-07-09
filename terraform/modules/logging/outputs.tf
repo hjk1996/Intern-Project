@@ -6,6 +6,9 @@ output "s3_log_export_policy_arn" {
   value = aws_iam_policy.s3_log_export.arn
 }
 
+output "log_group_arn" {
+  value = aws_cloudwatch_log_group.app.arn
+}
 
 
 
