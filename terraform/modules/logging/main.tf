@@ -1,4 +1,3 @@
-// cloudwatch log
 
 
 data "aws_region" "current" {
@@ -10,7 +9,7 @@ data "aws_caller_identity" "current" {
 
 
 
-
+// cloudwatch log
 resource "aws_cloudwatch_log_group" "app" {
   name = "${var.project_name}-application-log-group"
   // 로그 보존 기간
@@ -18,7 +17,7 @@ resource "aws_cloudwatch_log_group" "app" {
 }
 
 
-// log bucket
+// 장기적인 로그를 보관할 log bucket
 resource "aws_s3_bucket" "app_log" {
   bucket = "${var.project_name}-app-log-bucket"
 }
@@ -84,7 +83,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "app_log_config" {
 }
 
 
-// cloudwatch log에 log group을 생성하고, log를 읽고 쓰기 위한 권한
+// cloudwatch log에 자체적인 log group을 생성하고, log를 읽고 쓰기 위한 lambda 함수의 권한
 resource "aws_iam_policy" "cloudwatch_log" {
   name        = "${var.project_name}-app-cloudwatch-log-policy"
   description = "log group에 로그를 남기기 위한 권한"
@@ -109,7 +108,6 @@ resource "aws_iam_policy" "cloudwatch_log" {
     }
   )
 }
-
 
 
 
@@ -273,6 +271,7 @@ resource "aws_lambda_permission" "allow_scheduler" {
 
 
 # 매일 새벽 1시마다 lambda 함수를 트리거하는 스케쥴
+# 현재는 테스트를 위해 매 5분마다 트리거하도록 설정
 resource "aws_scheduler_schedule" "cloudwatch_log_s3_export" {
   name = "${var.project_name}-cloudwatch-log-s3-export-schedule"
 
@@ -283,7 +282,8 @@ resource "aws_scheduler_schedule" "cloudwatch_log_s3_export" {
   # 매일 새벽 1시에 trigger
   # 분 시 일 월 요일 년
   # ?는 특정 요일이 없다는 뜻임
-  schedule_expression = "cron(0 1 * * ? *)"
+  # schedule_expression = "rate(5 minutes)"
+  schedule_expression = "cron(5 * * * ? *)"
 
   target {
     # event bridge가 스케쥴마다 트리거할 대상
