@@ -58,3 +58,9 @@ module "bastion_module" {
   subnet_id = module.vpc_moudle.public_subnet_ids[0]
   ssh_key_path = var.ssh_key_path
 }
+
+
+module "app_module" {
+  source = "./modules/app"
+  project_name = var.project_name
+}
