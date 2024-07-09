@@ -283,7 +283,7 @@ resource "aws_scheduler_schedule" "cloudwatch_log_s3_export" {
   # 분 시 일 월 요일 년
   # ?는 특정 요일이 없다는 뜻임
   # schedule_expression = "rate(5 minutes)"
-  schedule_expression = "cron(5 * * * ? *)"
+  schedule_expression = "cron(5 * * * ?ㄹ *)"
 
   target {
     # event bridge가 스케쥴마다 트리거할 대상
