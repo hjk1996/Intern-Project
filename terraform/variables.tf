@@ -12,3 +12,10 @@ variable "project_name" {
   type    = string
   default = "intern-project"
 }
+
+
+variable "db_instance_class" {
+  type = string
+  default = "db.t3.micro"
+  
+}
