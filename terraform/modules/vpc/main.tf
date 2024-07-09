@@ -43,6 +43,9 @@ resource "aws_subnet" "public" {
   }
 }
 
+
+
+
 resource "aws_subnet" "private_app" {
   count             = length(local.azs)
   vpc_id            = aws_vpc.main.id

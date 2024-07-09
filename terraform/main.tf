@@ -51,5 +51,10 @@ module "db_module" {
    ]
 }
 
-
-
+module "bastion_module" {
+  source = "./modules/bastion"
+  project_name = var.project_name
+  vpc_id = module.vpc_moudle.vpc_id
+  subnet_id = module.vpc_moudle.public_subnet_ids[0]
+  ssh_key_path = var.ssh_key_path
+}
