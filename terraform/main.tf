@@ -37,4 +37,9 @@ module "logging_module" {
   project_name = var.project_name
 }
 
+module "db_module" {
+  source = "./modules/db"
+}
+
+
 
