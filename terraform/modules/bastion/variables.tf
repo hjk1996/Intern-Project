@@ -12,5 +12,5 @@ variable "subnet_id" {
 
 variable "ssh_key_path" {
   type = string
-  
+
 }

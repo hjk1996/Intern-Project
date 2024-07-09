@@ -38,29 +38,29 @@ module "logging_module" {
 }
 
 module "db_module" {
-  source = "./modules/db"
-  project_name = var.project_name
-  vpc_id = module.vpc_moudle.vpc_id
-  db_instance_class = var.db_instance_class
+  source                = "./modules/db"
+  project_name          = var.project_name
+  vpc_id                = module.vpc_moudle.vpc_id
+  db_instance_class     = var.db_instance_class
   db_private_subnet_ids = module.vpc_moudle.db_private_subnet_ids
-  cidr_block = var.cidr_block
-  db_password = var.db_password
+  cidr_block            = var.cidr_block
+  db_password           = var.db_password
 
   depends_on = [
     module.vpc_moudle
-   ]
+  ]
 }
 
 module "bastion_module" {
-  source = "./modules/bastion"
+  source       = "./modules/bastion"
   project_name = var.project_name
-  vpc_id = module.vpc_moudle.vpc_id
-  subnet_id = module.vpc_moudle.public_subnet_ids[0]
+  vpc_id       = module.vpc_moudle.vpc_id
+  subnet_id    = module.vpc_moudle.public_subnet_ids[0]
   ssh_key_path = var.ssh_key_path
 }
 
 
 module "app_module" {
-  source = "./modules/app"
+  source       = "./modules/app"
   project_name = var.project_name
 }

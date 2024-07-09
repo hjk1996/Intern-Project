@@ -1,5 +1,5 @@
 data "aws_region" "current" {
-  
+
 }
 
 // bastion 보안 그룹
@@ -37,8 +37,8 @@ resource "tls_private_key" "bastion_key" {
 
 // 생성한 key local에 저장
 resource "local_file" "bastion_key" {
-    content = tls_private_key.bastion_key.private_key_pem
-    filename = var.ssh_key_path
+  content  = tls_private_key.bastion_key.private_key_pem
+  filename = var.ssh_key_path
 }
 
 resource "aws_key_pair" "bastion_key" {
@@ -65,27 +65,27 @@ data "aws_ami" "ubuntu" {
 
 
 resource "aws_instance" "bastion" {
-    availability_zone = "${data.aws_region.current.name}a"
-    instance_type = "t3.micro"
-    vpc_security_group_ids = [
-        aws_security_group.bastion.id
-    ]
-    key_name = aws_key_pair.bastion_key.key_name
-    subnet_id = var.subnet_id
-    ami = data.aws_ami.ubuntu.id
-    // public ip 부여
-    associate_public_ip_address = true
-  
-    user_data = <<EOF
+  availability_zone = "${data.aws_region.current.name}a"
+  instance_type     = "t3.micro"
+  vpc_security_group_ids = [
+    aws_security_group.bastion.id
+  ]
+  key_name  = aws_key_pair.bastion_key.key_name
+  subnet_id = var.subnet_id
+  ami       = data.aws_ami.ubuntu.id
+  // public ip 부여
+  associate_public_ip_address = true
+
+  user_data = <<EOF
     sudo apt update
     sudo apt install -y mysql-client
     EOF
 
-  
-    tags = {
-        Name = "${var.project_name}-bastion"
-    }
-  
+
+  tags = {
+    Name = "${var.project_name}-bastion"
+  }
+
 }
 
 

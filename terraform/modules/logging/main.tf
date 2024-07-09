@@ -175,7 +175,7 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_log_export" {
 }
 
 resource "aws_iam_role_policy_attachment" "self_logging" {
-  role = aws_iam_role.cloudwatch_log_export_lambda.name
+  role       = aws_iam_role.cloudwatch_log_export_lambda.name
   policy_arn = aws_iam_policy.cloudwatch_log.arn
 }
 

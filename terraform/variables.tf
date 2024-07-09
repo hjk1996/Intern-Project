@@ -15,17 +15,17 @@ variable "project_name" {
 
 
 variable "db_instance_class" {
-  type = string
+  type    = string
   default = "db.t3.micro"
 }
 
 
 variable "ssh_key_path" {
-  type = string 
+  type = string
 }
 
 
 variable "db_password" {
-  type = string
+  type      = string
   sensitive = true
 }
