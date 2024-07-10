@@ -8,7 +8,6 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app .
 
-
 FROM alpine:latest
 # 빌드 스테이지에서 실행파일 가져오기
 COPY --from=builder /app/app /app
