@@ -14,3 +14,8 @@ output "bastion_dns_name" {
 output "db_endpoint" {
   value = module.db_module.db_endpoint
 }
+
+output "db_reader_endpoint" {
+  value = module.db_module.db_reader_endpoint
+}
+
