@@ -19,15 +19,6 @@ func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var employee models.Employee
-
-	result := db.DB.First(&employee, "1")
-
-	if result.Error != nil {
-		http.Error(w, fmt.Sprintf("Something is wrong with DB: %v", result.Error), http.StatusInternalServerError)
-		return
-	}
-
 	w.WriteHeader(http.StatusOK)
 }
 
