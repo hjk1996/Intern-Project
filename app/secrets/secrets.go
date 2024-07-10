@@ -12,8 +12,6 @@ import (
 type DBSecret struct {
 	User     string `json:"username"`
 	Password string `json:"password"`
-	Host     string `json:"host"`
-	Name     string `json:"db_name"`
 }
 
 func GetDBSecret(secretName string, region string) (DBSecret, error) {

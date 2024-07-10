@@ -25,7 +25,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	var employee models.Employee
 
-	result := db.ReplicaDB.First(&employee, employeeId)
+	result := db.DB.First(&employee, employeeId)
 
 	if result.Error != nil {
 		http.Error(w, "Failed to query user informaion", http.StatusInternalServerError)
@@ -81,7 +81,7 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 		Content:    writeBody.Content,
 	}
 
-	result := db.MasterDB.Create(&article)
+	result := db.DB.Create(&article)
 
 	if result.Error != nil {
 		http.Error(w, "Failed to write data to db", http.StatusInternalServerError)
