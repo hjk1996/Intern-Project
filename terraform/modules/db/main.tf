@@ -53,7 +53,7 @@ resource "aws_rds_cluster" "main" {
   engine                    = "mysql"
   db_cluster_instance_class = "db.m5d.large"
   storage_type              = "io1"
-  database_name = var.db_name
+  database_name             = var.db_name
   allocated_storage         = 100
   iops                      = 1000
   storage_encrypted         = true
@@ -61,6 +61,7 @@ resource "aws_rds_cluster" "main" {
   vpc_security_group_ids = [
     aws_security_group.db.id
   ]
+
   skip_final_snapshot         = true
   apply_immediately           = true
   manage_master_user_password = true

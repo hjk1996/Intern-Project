@@ -22,3 +22,7 @@ output "db_reader_endpoint" {
 output "ecr_address" {
   value = module.app_module.ecr_address
 }
+
+output "secret_id" {
+  value = module.db_module.secret_id
+}

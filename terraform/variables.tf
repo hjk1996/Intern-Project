@@ -20,7 +20,7 @@ variable "db_instance_class" {
 }
 
 variable "db_name" {
-  type = string
+  type    = string
   default = "app"
 }
 

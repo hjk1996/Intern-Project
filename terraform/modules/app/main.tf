@@ -79,19 +79,41 @@ resource "aws_iam_role" "task_role" {
   assume_role_policy = jsonencode(
     {
       "Version" : "2012-10-17",
-      Statement : [
+      "Statement" : [
         {
-          Action = "sts:AssumeRole"
-          Effect = "Allow"
-          Sid    = ""
-          Principal = {
-            Service = "ecs-tasks.amazonaws.com"
+          "Effect" : "Allow"
+          "Action" : "sts:AssumeRole"
+          "Sid" : ""
+          "Principal" : {
+            "Service" : "ecs-tasks.amazonaws.com"
           }
         },
       ]
     }
   )
 }
+
+resource "aws_iam_policy" "secret_manager_access" {
+  name = "${var.project_name}-secret-manager-access"
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow"
+          "Action" : [
+            "secretsmanager:GetSecretValue"
+          ]
+          "Resource" : data.aws_rds_cluster.main.master_user_secret[0].secret_arn
+        }
+
+      ]
+
+    }
+  )
+
+}
+
 
 
 
@@ -100,7 +122,7 @@ resource "aws_iam_role" "task_role" {
 resource "aws_ecs_task_definition" "app" {
   family = "${var.project_name}-app"
 
-  task_role_arn      = aws_iam_role.task_role.arn
+  task_role_arn = aws_iam_role.task_role.arn
 
 
   container_definitions = jsonencode([
@@ -116,27 +138,24 @@ resource "aws_ecs_task_definition" "app" {
           hostPort      = 8080
         }
       ]
-    environment = [
+      environment = [
         {
-            name = "DB_SECRET_NAME"
-            value = "temp"
+          name  = "DB_SECRET_NAME"
+          value = data.aws_rds_cluster.main.master_user_secret[0].secret_arn
         },
         {
-            name = "READER_ENDPOINT"
-            value = data.aws_rds_cluster.main.reader_endpoint
+          name  = "READER_ENDPOINT"
+          value = data.aws_rds_cluster.main.reader_endpoint
         },
         {
-            name = "WRITER_ENDPOINT"
-            value = data.aws_rds_cluster.main.endpoint
+          name  = "WRITER_ENDPOINT"
+          value = data.aws_rds_cluster.main.endpoint
         },
         {
-            name = "DB_NAME"
-            value = data.aws_rds_cluster.main.database_name
+          name  = "DB_NAME"
+          value = data.aws_rds_cluster.main.database_name
         },
-
-
-
-    ]
+      ]
     }
   ])
 }
