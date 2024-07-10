@@ -39,6 +39,7 @@ module "logging_module" {
 
 module "db_module" {
   source                = "./modules/db"
+  region                = var.region
   project_name          = var.project_name
   vpc_id                = module.vpc_moudle.vpc_id
   db_instance_class     = var.db_instance_class
@@ -61,6 +62,12 @@ module "bastion_module" {
 
 
 module "app_module" {
-  source       = "./modules/app"
-  project_name = var.project_name
+  source                = "./modules/app"
+  project_name          = var.project_name
+  db_cluster_identifier = module.db_module.db_cluster_identifier
+
+  depends_on = [
+    module.db_module
+  ]
+
 }

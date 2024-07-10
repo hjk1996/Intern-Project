@@ -1,3 +1,7 @@
+variable "region" {
+  type = string
+}
+
 variable "project_name" {
   type = string
 }
@@ -25,7 +29,6 @@ variable "db_password" {
 variable "cidr_block" {
   type = string
 }
-
 
 
 

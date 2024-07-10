@@ -19,3 +19,6 @@ output "db_reader_endpoint" {
   value = module.db_module.db_reader_endpoint
 }
 
+output "ecr_address" {
+  value = module.app_module.ecr_address
+}
