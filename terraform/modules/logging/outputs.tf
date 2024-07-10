@@ -10,6 +10,9 @@ output "log_group_arn" {
   value = aws_cloudwatch_log_group.app.arn
 }
 
+output "log_gorup_name" {
+  value = aws_cloudwatch_log_group.app.name
+}
 
 
 

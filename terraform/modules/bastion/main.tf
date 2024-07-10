@@ -24,7 +24,7 @@ resource "aws_security_group" "bastion" {
 
 
   tags = {
-    Name = "${var.project_name}-db-sg"
+    Name = "${var.project_name}-bastion-sg"
   }
 
 }
