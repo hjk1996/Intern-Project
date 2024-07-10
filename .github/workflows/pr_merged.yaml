@@ -19,7 +19,7 @@ jobs:
 
     env:
       APP_NAME: intern_project_app
-      AWS_REGION: ap-northeast-2재
+      AWS_REGION: ap-northeast-2
 
     steps:
       - name: Checkout code
