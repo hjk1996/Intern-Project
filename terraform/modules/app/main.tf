@@ -287,8 +287,8 @@ resource "aws_security_group" "lb" {
 
   ingress {
     protocol    = "tcp"
-    from_port   = 443
-    to_port     = 443
+    from_port   = 80
+    to_port     = 80
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -302,41 +302,42 @@ resource "aws_security_group" "lb" {
 
 }
 
-# resource "aws_lb" "app" {
-#   name = "${var.project_name}-app-alb"
-#   security_groups = [ aws_security_group.lb.id]
-#     internal = false
-#     load_balancer_type = "application"
-#     subnets = var.public_subnet_ids
+resource "aws_lb" "app" {
+  name = "${var.project_name}-app-alb"
+  security_groups = [ aws_security_group.lb.id]
+    internal = false
+    load_balancer_type = "application"
+    subnets = var.public_subnet_ids
 
 
-# }
+}
 
-# resource "aws_lb_target_group" "ecs_app" {
-#     name = "${var.project_name}-app-alb-tg"
-#     port = 443
-#     vpc_id = var.vpc_id
-#     protocol = "HTTPS"
-#     target_type = "ip"
-# }
+resource "aws_lb_target_group" "ecs_app" {
+    name = "${var.project_name}-app-alb-tg"
+    port = var.app_port
+    vpc_id = var.vpc_id
+    protocol = "HTTP"
+    target_type = "ip"
 
-
-# resource "aws_lb_listener" "ecs_app" {
-#   load_balancer_arn = aws_lb.app.arn
-#   port = 443
-#   protocol = "HTTPS"
-#   ssl_policy        = "ELBSecurityPolicy-2016-08"
-
-#   default_action {
-#       type = "forward"
-#       target_group_arn = aws_lb_target_group.ecs_app.arn
-#     }
-
-# }
+    health_check {
+      enabled = true
+      protocol = "HTTP"
+      matcher = 200
+      healthy_threshold = 3
+      interval = 30
+    }
+}
 
 
-# resource "aws_acm_certificate" "alb" {
+resource "aws_lb_listener" "ecs_app" {
+  load_balancer_arn = aws_lb.app.arn
+  port = 80
+  protocol = "HTTP"
 
-  
-# }
+  default_action {
+      type = "forward"
+      target_group_arn = aws_lb_target_group.ecs_app.arn
+    }
+
+}
 
