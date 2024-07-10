@@ -11,6 +11,26 @@ import (
 	"github.com/hjk1996/LGUPlus-Intern-Project/models"
 )
 
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("Method not allowed"))
+		return
+	}
+
+	var employee models.Employee
+
+	result := db.DB.First(&employee, "1")
+
+	if result.Error != nil {
+		http.Error(w, fmt.Sprintf("Something is wrong with DB: %v", result.Error), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 // 홈화면
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
