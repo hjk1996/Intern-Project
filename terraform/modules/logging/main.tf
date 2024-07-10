@@ -20,6 +20,7 @@ resource "aws_cloudwatch_log_group" "app" {
 // 장기적인 로그를 보관할 log bucket
 resource "aws_s3_bucket" "app_log" {
   bucket = "${var.project_name}-app-log-bucket"
+  force_destroy = true
 }
 
 // cloudwatch logs가 s3로 로그를 전송시키기 위한 bucket policy 설정
