@@ -1,8 +1,3 @@
-
-output "public_subnet_ids" {
-  value = module.vpc_moudle.public_subnet_ids
-}
-
 output "log_group_arn" {
   value = module.logging_module.log_group_arn
 }
@@ -21,4 +16,12 @@ output "db_reader_endpoint" {
 
 output "ecr_address" {
   value = module.app_module.ecr_address
+}
+
+output "secret_id" {
+  value = module.db_module.secret_id
+}
+
+output "ami_id" {
+  value = module.bastion_module.ami_id
 }

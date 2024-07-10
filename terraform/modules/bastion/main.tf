@@ -24,7 +24,7 @@ resource "aws_security_group" "bastion" {
 
 
   tags = {
-    Name = "${var.project_name}-db-sg"
+    Name = "${var.project_name}-bastion-sg"
   }
 
 }
@@ -65,7 +65,7 @@ data "aws_ami" "ubuntu" {
 
 
 resource "aws_instance" "bastion" {
-  availability_zone = "${data.aws_region.current.name}a"
+  availability_zone = "${var.region}a"
   instance_type     = "t3.micro"
   vpc_security_group_ids = [
     aws_security_group.bastion.id
