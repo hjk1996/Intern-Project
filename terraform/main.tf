@@ -69,5 +69,4 @@ module "app_module" {
   depends_on = [
     module.db_module
   ]
-
 }
