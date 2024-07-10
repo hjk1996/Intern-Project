@@ -19,6 +19,11 @@ variable "db_instance_class" {
   default = "db.t3.micro"
 }
 
+variable "db_name" {
+  type = string
+  default = "app"
+}
+
 
 variable "ssh_key_path" {
   type = string

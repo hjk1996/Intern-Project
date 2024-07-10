@@ -53,6 +53,7 @@ resource "aws_rds_cluster" "main" {
   engine                    = "mysql"
   db_cluster_instance_class = "db.m5d.large"
   storage_type              = "io1"
+  database_name = var.db_name
   allocated_storage         = 100
   iops                      = 1000
   storage_encrypted         = true

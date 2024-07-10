@@ -46,6 +46,7 @@ module "db_module" {
   db_private_subnet_ids = module.vpc_moudle.db_private_subnet_ids
   cidr_block            = var.cidr_block
   db_password           = var.db_password
+  db_name = var.db_name
 
   depends_on = [
     module.vpc_moudle
