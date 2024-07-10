@@ -21,3 +21,7 @@ output "ecr_address" {
 output "secret_id" {
   value = module.db_module.secret_id
 }
+
+output "ami_id" {
+  value = module.bastion_module.ami_id
+}

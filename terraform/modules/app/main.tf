@@ -6,12 +6,16 @@ data "aws_region" "current" {
 
 }
 
+locals {
+  container_name = "app"
+}
+
 
 // ECR 리포지토리
 resource "aws_ecr_repository" "app" {
   name                 = "${var.project_name}-app"
   image_tag_mutability = "MUTABLE"
-  force_delete = true
+  force_delete         = true
 
   image_scanning_configuration {
     scan_on_push = true
@@ -194,7 +198,7 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([
     {
-      name      = "app"
+      name      = local.container_name
       image     = "${aws_ecr_repository.app.repository_url}:prod"
       cpu       = 10
       memory    = 512
@@ -222,7 +226,12 @@ resource "aws_ecs_task_definition" "app" {
           name  = "DB_NAME"
           value = data.aws_rds_cluster.main.database_name
         },
+        {
+          name  = "APP_PORT"
+          value = "${tostring(var.app_port)}"
+        }
       ]
+
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -239,8 +248,8 @@ resource "aws_ecs_task_definition" "app" {
 
 resource "aws_security_group" "ecs_task" {
 
-  name = "${var.project_name}-ecs-task-sg"
-    vpc_id = var.vpc_id
+  name   = "${var.project_name}-ecs-task-sg"
+  vpc_id = var.vpc_id
 
   ingress {
     protocol    = "tcp"
@@ -276,14 +285,21 @@ resource "aws_ecs_service" "app" {
     assign_public_ip = true
   }
 
+  
+  load_balancer {
+    container_port   = var.app_port
+    container_name   = local.container_name
+    target_group_arn = aws_lb_target_group.ecs_app.arn
+  }
+
 
 }
 
 // alb security group
 resource "aws_security_group" "lb" {
 
-  name = "${var.project_name}-app-lb-sg"
-    vpc_id = var.vpc_id
+  name   = "${var.project_name}-app-lb-sg"
+  vpc_id = var.vpc_id
 
   ingress {
     protocol    = "tcp"
@@ -303,41 +319,43 @@ resource "aws_security_group" "lb" {
 }
 
 resource "aws_lb" "app" {
-  name = "${var.project_name}-app-alb"
-  security_groups = [ aws_security_group.lb.id]
-    internal = false
-    load_balancer_type = "application"
-    subnets = var.public_subnet_ids
+  name               = "${var.project_name}-app-alb"
+  security_groups    = [aws_security_group.lb.id]
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = var.public_subnet_ids
 
 
 }
 
 resource "aws_lb_target_group" "ecs_app" {
-    name = "${var.project_name}-app-alb-tg"
-    port = var.app_port
-    vpc_id = var.vpc_id
-    protocol = "HTTP"
-    target_type = "ip"
+  name        = "${var.project_name}-app-alb-tg"
+  port        = var.app_port
+  vpc_id      = var.vpc_id
+  protocol    = "HTTP"
+  target_type = "ip"
 
-    health_check {
-      enabled = true
-      protocol = "HTTP"
-      matcher = 200
-      healthy_threshold = 3
-      interval = 30
-    }
+
+
+  health_check {
+    enabled           = true
+    protocol          = "HTTP"
+    matcher           = 200
+    healthy_threshold = 3
+    interval          = 30
+  }
 }
 
 
 resource "aws_lb_listener" "ecs_app" {
   load_balancer_arn = aws_lb.app.arn
-  port = 80
-  protocol = "HTTP"
+  port              = 80
+  protocol          = "HTTP"
 
   default_action {
-      type = "forward"
-      target_group_arn = aws_lb_target_group.ecs_app.arn
-    }
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ecs_app.arn
+  }
 
 }
 

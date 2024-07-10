@@ -55,15 +55,16 @@ module "db_module" {
 
 module "bastion_module" {
   source       = "./modules/bastion"
+  region = var.region
   project_name = var.project_name
   vpc_id       = module.vpc_module.vpc_id
   subnet_id    = module.vpc_module.public_subnet_ids[0]
   ssh_key_path = var.ssh_key_path
 
 
-  depends_on = [ 
+  depends_on = [
     module.vpc_module
-   ]
+  ]
 
 }
 
@@ -74,9 +75,9 @@ module "app_module" {
   db_cluster_identifier = module.db_module.db_cluster_identifier
   log_group_name        = module.logging_module.log_gorup_name
   log_group_arn         = module.logging_module.log_group_arn
-  vpc_id = module.vpc_module.vpc_id
+  vpc_id                = module.vpc_module.vpc_id
   cidr_block            = var.cidr_block
-  public_subnet_ids = module.vpc_module.public_subnet_ids
+  public_subnet_ids     = module.vpc_module.public_subnet_ids
   app_subnet_ids        = module.vpc_module.app_subnet_ids
   app_port              = var.app_port
 
