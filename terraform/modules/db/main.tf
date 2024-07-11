@@ -46,7 +46,7 @@ resource "aws_security_group" "db" {
 
 
 
-
+// DB Cluster
 resource "aws_rds_cluster" "main" {
   cluster_identifier   = "${var.project_name}-db-cluster"
   availability_zones   = local.azs
@@ -65,6 +65,7 @@ resource "aws_rds_cluster" "main" {
   master_username             = "master"
 }
 
+// DB Instance
 resource "aws_rds_cluster_instance" "cluster_instances" {
   count              = length(local.azs)
   identifier         = "${var.project_name}-db-${count.index}"
@@ -73,3 +74,23 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   engine             = aws_rds_cluster.main.engine
   engine_version     = aws_rds_cluster.main.engine_version
 }
+
+resource "aws_iam_role" "db_populator" {
+  name = "${var.project_name}-db-populator-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com",
+        },
+      },
+    ],
+  })
+}
+
+
+
+

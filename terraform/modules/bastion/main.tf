@@ -39,7 +39,13 @@ resource "tls_private_key" "bastion_key" {
 resource "local_file" "bastion_key" {
   content  = tls_private_key.bastion_key.private_key_pem
   filename = var.ssh_key_path
+
+  provisioner "local-exec" {
+    command = "chmod 400 ${var.ssh_key_path}"
+  }
 }
+
+
 
 resource "aws_key_pair" "bastion_key" {
   key_name   = "${var.project_name}-bastion-key-pair"
@@ -61,9 +67,10 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
 
   user_data = <<EOF
-    sudo apt update
-    sudo apt install -y mysql-client
-    EOF
+#!/bin/bash
+sudo apt update
+sudo apt install -y mysql-client
+EOF
 
 
   tags = {
