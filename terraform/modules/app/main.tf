@@ -7,13 +7,13 @@ data "aws_region" "current" {
 }
 
 locals {
-  container_name = "app"
+  container_name = "${var.project_name}-app"
 }
 
 
 // ECR 리포지토리
 resource "aws_ecr_repository" "app" {
-  name                 = "${var.project_name}-app"
+  name                 = local.container_name
   image_tag_mutability = "MUTABLE"
   force_delete         = true
 
@@ -86,7 +86,7 @@ resource "aws_ecs_cluster" "main" {
 
 // task role
 resource "aws_iam_role" "task_role" {
-  name = "${var.project_name}-app-task-role"
+  name = "${local.container_name}-task-role"
   assume_role_policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -105,7 +105,7 @@ resource "aws_iam_role" "task_role" {
 }
 
 resource "aws_iam_policy" "secret_manager_access" {
-  name = "${var.project_name}-secret-manager-access"
+  name = "${local.container_name}-secret-manager-access"
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -132,7 +132,7 @@ resource "aws_iam_role_policy_attachment" "secret_manager_access" {
 
 // execution role
 resource "aws_iam_role" "execution_role" {
-  name = "${var.project_name}-execution-role"
+  name = "${local.container_name}-execution-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -148,7 +148,7 @@ resource "aws_iam_role" "execution_role" {
 }
 
 resource "aws_iam_policy" "log" {
-  name = "${var.project_name}-cloudwatch-logs-access"
+  name = "${local.container_name}-cloudwatch-logs-access"
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -184,7 +184,7 @@ resource "aws_iam_role_policy_attachment" "log" {
 
 // 앱에 대한 task definition
 resource "aws_ecs_task_definition" "app" {
-  family = "${var.project_name}-app"
+  family = local.container_name
 
   execution_role_arn = aws_iam_role.execution_role.arn
   task_role_arn      = aws_iam_role.task_role.arn
@@ -247,7 +247,7 @@ resource "aws_ecs_task_definition" "app" {
 
 resource "aws_security_group" "ecs_task" {
 
-  name   = "${var.project_name}-ecs-task-sg"
+  name   = "${local.container_name}-sg"
   vpc_id = var.vpc_id
 
   ingress {
@@ -297,7 +297,7 @@ resource "aws_ecs_service" "app" {
 // alb security group
 resource "aws_security_group" "lb" {
 
-  name   = "${var.project_name}-app-lb-sg"
+  name   = "${local.container_name}-lb-sg"
   vpc_id = var.vpc_id
 
   ingress {
@@ -318,7 +318,7 @@ resource "aws_security_group" "lb" {
 }
 
 resource "aws_lb" "app" {
-  name               = "${var.project_name}-app-alb"
+  name               = "${local.container_name}-alb"
   security_groups    = [aws_security_group.lb.id]
   internal           = false
   load_balancer_type = "application"
@@ -328,7 +328,7 @@ resource "aws_lb" "app" {
 }
 
 resource "aws_lb_target_group" "ecs_app" {
-  name        = "${var.project_name}-app-alb-tg"
+  name        = "${local.container_name}-alb-tg"
   port        = var.app_port
   vpc_id      = var.vpc_id
   protocol    = "HTTP"

@@ -50,12 +50,9 @@ resource "aws_security_group" "db" {
 resource "aws_rds_cluster" "main" {
   cluster_identifier        = "${var.project_name}-db-cluster"
   availability_zones        = local.azs
-  engine                    = "mysql"
-  db_cluster_instance_class = "db.m5d.large"
-  storage_type              = "io1"
+  engine                  = "aurora-mysql"
+  engine_version          = "5.7.mysql_aurora.2.11.1"
   database_name             = var.db_name
-  allocated_storage         = 100
-  iops                      = 1000
   storage_encrypted         = true
   db_subnet_group_name      = aws_db_subnet_group.main.name
   vpc_security_group_ids = [
@@ -68,9 +65,11 @@ resource "aws_rds_cluster" "main" {
   master_username             = "master"
 }
 
-
-# data "aws_secretsmanager_secret" "rds_cluster_secret" {
-
-
-# }
-
+resource "aws_rds_cluster_instance" "cluster_instances" {
+  count              = length(local.azs)
+  identifier         = "${var.project_name}-db-${count.index}"
+  cluster_identifier = aws_rds_cluster.main.id
+  instance_class     = "db.t3.medium"
+  engine             = aws_rds_cluster.main.engine
+  engine_version     = aws_rds_cluster.main.engine_version
+}

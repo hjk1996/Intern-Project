@@ -54,22 +54,20 @@ jobs:
           IMAGE_TAG: ${{ github.run_number }}
         run: |
           docker build -t ${{ secrets.ECR_ADDRESS }}:$IMAGE_TAG .
-          docker image tag ${{ secrets.ECR_ADDRESS }}:$IMAGE_TAG ${{ secrets.ECR_ADDRESS }}:latest
           docker push ${{ secrets.ECR_ADDRESS }}:$IMAGE_TAG
-          docker push ${{ secrets.ECR_ADDRESS }}:latest
           echo "image=${{ secrets.ECR_ADDRESS }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
 
       
       # Task Definition 다운로드
       - name: Download ECS Task Definition
+        id: get-task-def
         run: |
           aws ecs describe-task-definition --task-definition ${{ env.APP_NAME }} --query taskDefinition > task-definition.json
-          pwd
 
       # 새로운 버전의 이미지로 task definition 업데이트
       - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
+        id: update-task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
@@ -79,7 +77,7 @@ jobs:
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.update-task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE_NAME }}
           cluster: ${{ env.ECS_CLUSTER_NAME }}
-          wait-for-service-stability: 포
+          wait-for-service-stability: true

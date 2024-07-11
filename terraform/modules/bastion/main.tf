@@ -47,22 +47,6 @@ resource "aws_key_pair" "bastion_key" {
 }
 
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
-}
-
 
 resource "aws_instance" "bastion" {
   availability_zone = "${var.region}a"
@@ -72,7 +56,7 @@ resource "aws_instance" "bastion" {
   ]
   key_name  = aws_key_pair.bastion_key.key_name
   subnet_id = var.subnet_id
-  ami       = data.aws_ami.ubuntu.id
+  ami       = "ami-062cf18d655c0b1e8"
   // public ip 부여
   associate_public_ip_address = true
 
