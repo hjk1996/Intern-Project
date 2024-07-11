@@ -12,6 +12,6 @@ output "db_cluster_identifier" {
 }
 
 
-output "secret_id" {
-  value = aws_rds_cluster.main.master_user_secret
+output "db_secret_arn" {
+  value = aws_rds_cluster.main.master_user_secret[0].secret_arn
 }

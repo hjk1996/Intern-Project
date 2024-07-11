@@ -38,5 +38,8 @@ variable "db_cluster_identifier" {
   type = string
 }
 
+variable "db_secret_arn" {
+  type = string
+}
 
 

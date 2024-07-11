@@ -284,7 +284,7 @@ resource "aws_ecs_service" "app" {
     assign_public_ip = true
   }
 
-  
+
   load_balancer {
     container_port   = var.app_port
     container_name   = local.container_name

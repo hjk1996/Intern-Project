@@ -19,7 +19,7 @@ resource "aws_cloudwatch_log_group" "app" {
 
 // 장기적인 로그를 보관할 log bucket
 resource "aws_s3_bucket" "app_log" {
-  bucket = "${var.project_name}-app-log-bucket"
+  bucket        = "${var.project_name}-app-log-bucket"
   force_destroy = true
 }
 

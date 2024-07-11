@@ -55,7 +55,7 @@ module "db_module" {
 
 module "bastion_module" {
   source       = "./modules/bastion"
-  region = var.region
+  region       = var.region
   project_name = var.project_name
   vpc_id       = module.vpc_module.vpc_id
   subnet_id    = module.vpc_module.public_subnet_ids[0]
@@ -80,6 +80,7 @@ module "app_module" {
   public_subnet_ids     = module.vpc_module.public_subnet_ids
   app_subnet_ids        = module.vpc_module.app_subnet_ids
   app_port              = var.app_port
+  db_secret_arn         = module.db_module.db_secret_arn
 
   depends_on = [
     module.vpc_module,
