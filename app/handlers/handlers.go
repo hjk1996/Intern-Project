@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/hjk1996/LGUPlus-Intern-Project/db"
 	"github.com/hjk1996/LGUPlus-Intern-Project/models"
@@ -41,7 +42,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		http.Error(w, "Failed to query user informaion", http.StatusInternalServerError)
-		log.Println(result.Error)
+		log.Error(result.Error)
 		return
 	}
 
