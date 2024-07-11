@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      APP_NAME: intern_project_app
+      APP_NAME: intern-project-app
       AWS_REGION: ap-northeast-2
       ECS_CLUSTER_NAME: intern-project-cluster
       ECS_SERVICE_NAME: intern-project-service
@@ -81,4 +81,4 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE_NAME }}
           cluster: ${{ env.ECS_CLUSTER_NAME }}
-          wait-for-service-stability: true
+          wait-for-service-stability: 포
