@@ -1,7 +1,3 @@
-data "aws_rds_cluster" "main" {
-  cluster_identifier = var.db_cluster_identifier
-}
-
 data "aws_region" "current" {
 
 }
@@ -115,7 +111,7 @@ resource "aws_iam_policy" "secret_manager_access" {
           "Action" : [
             "secretsmanager:GetSecretValue"
           ]
-          "Resource" : data.aws_rds_cluster.main.master_user_secret[0].secret_arn
+          "Resource" : var.db_secret_arn
         }
 
       ]
@@ -211,20 +207,20 @@ resource "aws_ecs_task_definition" "app" {
       environment = [
         {
           name  = "DB_SECRET_NAME"
-          value = data.aws_rds_cluster.main.master_user_secret[0].secret_arn
+          value = var.db_secret_arn
         },
         {
           name  = "READER_ENDPOINT"
-          value = data.aws_rds_cluster.main.reader_endpoint
+          value = var.db_reader_endpoint
         },
         {
           name  = "WRITER_ENDPOINT"
-          value = data.aws_rds_cluster.main.endpoint
+          value = var.db_writer_endpoint
         },
         {
           name  = "DB_NAME"
-          value = data.aws_rds_cluster.main.database_name
-        },
+          value = var.db_name
+      },
         {
           name  = "APP_PORT"
           value = "${tostring(var.app_port)}"
@@ -235,7 +231,7 @@ resource "aws_ecs_task_definition" "app" {
         logDriver = "awslogs"
         options = {
           awslogs-group         = var.log_group_name
-          awslogs-region        = data.aws_region.current.name
+          awslogs-region        = var.region
           awslogs-stream-prefix = "ecs"
         }
       }

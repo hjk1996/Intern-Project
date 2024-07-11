@@ -1,3 +1,6 @@
+variable "region" {
+  type = string
+}
 variable "project_name" {
   type = string
 
@@ -38,8 +41,22 @@ variable "db_cluster_identifier" {
   type = string
 }
 
+
 variable "db_secret_arn" {
   type = string
 }
 
 
+variable "db_reader_endpoint" {
+  type = string
+}
+
+
+
+variable "db_writer_endpoint" {
+  type = string
+}
+
+variable "db_name" {
+  type = string
+}
