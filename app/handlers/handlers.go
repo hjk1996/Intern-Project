@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -40,6 +41,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		http.Error(w, "Failed to query user informaion", http.StatusInternalServerError)
+		log.Println(result.Error)
 		return
 	}
 
