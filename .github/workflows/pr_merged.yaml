@@ -65,6 +65,7 @@ jobs:
       - name: Download ECS Task Definition
         run: |
           aws ecs describe-task-definition --task-definition ${{ env.APP_NAME }} --query taskDefinition > task-definition.json
+          pwd
 
       # 새로운 버전의 이미지로 task definition 업데이트
       - name: Fill in the new image ID in the Amazon ECS task definition
