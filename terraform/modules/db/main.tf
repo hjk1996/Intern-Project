@@ -74,30 +74,3 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   engine             = aws_rds_cluster.main.engine
   engine_version     = aws_rds_cluster.main.engine_version
 }
-
-
-
-# resource "aws_iam_role" "db_populator" {
-#   name = "${var.project_name}-db-populator-role"
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17",
-#     Statement = [
-#       {
-#         Action = "sts:AssumeRole",
-#         Effect = "Allow",
-#         Principal = {
-#           Service = "lambda.amazonaws.com",
-#         },
-#       },
-#     ],
-#   })
-# }
-
-# resource "aws_iam_role_policy_attachment" "lambda_policy" {
-#   role       = aws_iam_role.db_populator.name
-#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-# }
-
-
-
-

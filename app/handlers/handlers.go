@@ -13,6 +13,15 @@ import (
 	"github.com/hjk1996/LGUPlus-Intern-Project/models"
 )
 
+func logRequest(r *http.Request) *log.Entry {
+	return log.WithFields(log.Fields{
+		"method": r.Method,
+		"url":    r.URL.String(),
+		"ip":     r.RemoteAddr,
+		"agent":  r.UserAgent(),
+	})
+}
+
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.Header().Set("Content-Type", "text/plain")
@@ -26,10 +35,13 @@ func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 
 // 홈화면
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	logger := logRequest(r)
+
 	if r.Method != http.MethodGet {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte("Method not allowed"))
+		logger.Warn("Method not allowed")
 		return
 	}
 
@@ -41,14 +53,20 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	result := db.DB.First(&employee, employeeId)
 
 	if result.Error != nil {
-		http.Error(w, "Failed to query user informaion", http.StatusInternalServerError)
-		log.Error(result.Error)
+		msg := "Failed to query user informaion"
+		http.Error(w, msg, http.StatusInternalServerError)
+		logger.WithError(result.Error).Error(msg)
+
 		return
 	}
 
 	w.Header().Set("Content-Type", "text/plan")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf("Hello %s!", employee.Name)))
+
+	logger.WithFields(log.Fields{
+		"employeeId": employeeId,
+	}).Info("HomeHandler completed successfully")
 }
 
 type ArticleBody struct {
@@ -57,25 +75,33 @@ type ArticleBody struct {
 
 // DB에 article write하는 handler
 func ArticleHandler(w http.ResponseWriter, r *http.Request) {
+
+	logger := logRequest(r)
+
 	if r.Method != http.MethodPost {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte("Method not allowed"))
+		logger.Warn("Method not allowed")
+
 		return
 	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		msg := "Failed to read request body"
+		http.Error(w, msg, http.StatusBadRequest)
+		logger.WithError(err).Error(msg)
 		return
-
 	}
 
 	var writeBody ArticleBody
 	err = json.Unmarshal(body, &writeBody)
 
 	if err != nil {
-		http.Error(w, "Failed to parse request body", http.StatusBadRequest)
+		msg := "Failed to parse request body"
+		http.Error(w, msg, http.StatusBadRequest)
+		log.WithError(err).Error(msg)
 		return
 	}
 
@@ -85,7 +111,9 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	employeeIdUint := uint(employeeId)
 
 	if err != nil {
-		http.Error(w, "Invalid employee id", http.StatusBadRequest)
+		msg := "Invalid employee id"
+		http.Error(w, msg, http.StatusBadRequest)
+		log.WithError(err).Error(msg)
 		return
 
 	}
@@ -98,12 +126,18 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	result := db.DB.Create(&article)
 
 	if result.Error != nil {
-		http.Error(w, "Failed to write data to db", http.StatusInternalServerError)
+		msg := "Failed to write data to db"
+		http.Error(w, msg, http.StatusInternalServerError)
+		log.WithError(result.Error).Error(msg)
 		return
 	}
 
 	w.Header().Set("Content-Type", "text/plan")
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Successfully wrote the article"))
+
+	logger.WithFields(log.Fields{
+		"employeeId": employeeId,
+	}).Info("ArticleHandler completed successfully")
 
 }

@@ -2,13 +2,19 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/hjk1996/LGUPlus-Intern-Project/db"
 	"github.com/hjk1996/LGUPlus-Intern-Project/router"
 )
+
+func init() {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+}
 
 func main() {
 	db.Init()
