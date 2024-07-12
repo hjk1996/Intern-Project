@@ -14,10 +14,11 @@ import (
 )
 
 func logRequest(r *http.Request) *log.Entry {
+	clientIP := r.Header.Get("X-Forwarded-For")
 	return log.WithFields(log.Fields{
 		"method": r.Method,
 		"url":    r.URL.String(),
-		"ip":     r.RemoteAddr,
+		"ip":     clientIP,
 		"agent":  r.UserAgent(),
 	})
 }
@@ -52,7 +53,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		msg := "No employee ID found in URL"
 		http.Error(w, msg, http.StatusBadRequest)
 		logger.Info(msg)
-		return 
+		return
 	}
 
 	var employee models.Employee

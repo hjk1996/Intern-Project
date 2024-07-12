@@ -294,6 +294,14 @@ resource "aws_scheduler_schedule" "cloudwatch_log_s3_export" {
   }
 }
 
+resource "aws_cloudwatch_log_metric_filter" "app_error" {
+  name           = "${var.project_name}-app-error-log-filter"
+  pattern        = ""
+  log_group_name = aws_cloudwatch_log_group.app.name
 
-
-
+  metric_transformation {
+    name      = "EventCount"
+    namespace = "YourNamespace"
+    value     = "1"
+  }
+}
