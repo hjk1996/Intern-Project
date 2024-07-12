@@ -232,7 +232,7 @@ resource "aws_iam_role" "lambda_trigger_scheduler" {
           Effect = "Allow"
           Sid    = ""
           Principal = {
-            Service = "lambda.amazonaws.com"
+            Service = "scheduler.amazonaws.com"
           }
         },
       ]
