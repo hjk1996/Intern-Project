@@ -165,3 +165,10 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	}).Info("ArticleHandler completed successfully")
 
 }
+
+func ErrorHandler(w http.ResponseWriter, r *http.Request) {
+	logger := logRequest(r)
+	msg := "something went wrong"
+	http.Error(w, msg, http.StatusBadRequest)
+	logger.WithError(fmt.Errorf(msg)).Error(msg)
+}
