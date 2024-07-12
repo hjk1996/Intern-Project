@@ -26,11 +26,6 @@ variable "db_instance_class" {
 }
 
 
-variable "db_password" {
-  type      = string
-  sensitive = true
-}
-
 variable "cidr_block" {
   type = string
 }

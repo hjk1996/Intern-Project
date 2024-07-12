@@ -220,7 +220,7 @@ resource "aws_ecs_task_definition" "app" {
         {
           name  = "DB_NAME"
           value = var.db_name
-      },
+        },
         {
           name  = "APP_PORT"
           value = "${tostring(var.app_port)}"

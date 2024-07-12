@@ -29,14 +29,14 @@ variable "ssh_key_path" {
   type = string
 }
 
-
-variable "db_password" {
-  type      = string
-  sensitive = true
-}
-
 variable "app_port" {
   type = number
 }
 
+variable "slack_webhook_url" {
+  type = string
+}
 
+variable "slack_channel" {
+  type = string
+}

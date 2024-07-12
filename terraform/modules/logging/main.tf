@@ -8,6 +8,12 @@ data "aws_caller_identity" "current" {
 }
 
 
+locals {
+  metric_name             = "AppErrorCount"
+  log_export_lambda_name  = "log-export-lambda"
+  slack_alarm_lambda_name = "slack-alarm-lambda"
+}
+
 
 // cloudwatch log
 resource "aws_cloudwatch_log_group" "app" {
@@ -182,20 +188,20 @@ resource "aws_iam_role_policy_attachment" "self_logging" {
 
 
 
-data "archive_file" "lambda" {
+data "archive_file" "log_export_lambda" {
   type        = "zip"
-  source_file = "${path.module}/lambda_function/lambda_function.py"
-  output_path = "${path.module}/lambda_function.zip"
+  source_file = "${path.module}/${local.log_export_lambda_name}/lambda_function.py"
+  output_path = "${path.module}/${local.log_export_lambda_name}.zip"
 }
 
 
 // cloudwatch log를 s3로 export 하기 위한 lambda
 resource "aws_lambda_function" "cloudwatch_log_s3_export" {
-  function_name    = "${var.project_name}-cloudwatch-log-s3-export-lambda"
-  filename         = "${path.module}/lambda_function.zip"
+  function_name    = "${var.project_name}-${local.log_export_lambda_name}"
+  filename         = "${path.module}/${local.log_export_lambda_name}.zip"
   handler          = "lambda_function.lambda_handler"
   role             = aws_iam_role.cloudwatch_log_export_lambda.arn
-  source_code_hash = data.archive_file.lambda.output_base64sha256
+  source_code_hash = data.archive_file.log_export_lambda.output_base64sha256
   timeout          = 120
 
   runtime = "python3.11"
@@ -209,7 +215,7 @@ resource "aws_lambda_function" "cloudwatch_log_s3_export" {
 
 
   depends_on = [
-    data.archive_file.lambda
+    data.archive_file.log_export_lambda
   ]
 }
 
@@ -226,7 +232,7 @@ resource "aws_iam_role" "lambda_trigger_scheduler" {
           Effect = "Allow"
           Sid    = ""
           Principal = {
-            Service = "scheduler.amazonaws.com"
+            Service = "lambda.amazonaws.com"
           }
         },
       ]
@@ -300,34 +306,134 @@ resource "aws_cloudwatch_log_metric_filter" "app_error" {
   log_group_name = aws_cloudwatch_log_group.app.name
 
   metric_transformation {
-    name      = "ErrorCount"
-    namespace = "${var.project_name}"
+    name      = local.metric_name
+    namespace = var.project_name
     value     = "1"
   }
+
+
 }
+
+// cloudwatch app error log alarm
 resource "aws_cloudwatch_metric_alarm" "app_error_alarm" {
-  alarm_name = "${var.project_name}-app-error-alarm"
-  metric_name         = aws_cloudwatch_log_metric_filter.app_error.name
+  alarm_name          = "${var.project_name}-app-error-alarm"
+  alarm_description   = "application 에러 로그에 대한 알람"
+  metric_name         = local.metric_name
   threshold           = "0"
   statistic           = "Sum"
   comparison_operator = "GreaterThanThreshold"
+  // 알람을 트리거링 하기 위한 데이터포인트의 수
   datapoints_to_alarm = "1"
   evaluation_periods  = "1"
-  period              = "60"
-  namespace           = var.project_name
-  alarm_actions       = [aws_sns_topic.app_error.arn]
+  // 메트릭을 평가하기 위한 시간 윈도우 사이즈 (초단위)
+  period          = "60"
+  namespace       = var.project_name
+  actions_enabled = true
+  alarm_actions   = [aws_sns_topic.app_error.arn]
+
+
+
 }
 
+// 에러 로그가 전송되는 SNS
 resource "aws_sns_topic" "app_error" {
   name = "${var.project_name}-app-error-topic"
 }
 
-# resource "aws_sns_topic_subscription" "app_error_metric" {
-#   topic_arn = aws_sns_topic.app_error.arn
+resource "aws_sns_topic_subscription" "slack_lambda" {
+  topic_arn = aws_sns_topic.app_error.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.slack_alarm.arn
+}
 
-# }
+
+data "archive_file" "slack_alarm_lambda" {
+  type        = "zip"
+  source_file = "${path.module}/${local.slack_alarm_lambda_name}/lambda_function.py"
+  output_path = "${path.module}/${local.slack_alarm_lambda_name}.zip"
+}
+
+
+// cloudwatch log를 s3로 export 하기 위한 lambda
+resource "aws_lambda_function" "slack_alarm" {
+  function_name    = "${var.project_name}-${local.slack_alarm_lambda_name}"
+  filename         = "${path.module}/${local.slack_alarm_lambda_name}.zip"
+  handler          = "lambda_function.lambda_handler"
+  role             = aws_iam_role.cloudwatch_log_export_lambda.arn
+  source_code_hash = data.archive_file.slack_alarm_lambda.output_base64sha256
+  timeout          = 120
+
+  runtime = "python3.11"
+
+  environment {
+    variables = {
+      SLACK_WEBHOOK_URL = var.slack_webhook_url
+      SLACK_CHANNEL     = var.slack_channel
+    }
+  }
+
+
+  depends_on = [
+    data.archive_file.slack_alarm_lambda
+  ]
+}
+
+# scheduler가 lambda를 trigger하기 위한 permission
+resource "aws_lambda_permission" "allow_sns" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.slack_alarm.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.app_error.arn
+}
 
 
 
+
+
+resource "aws_iam_role" "slack_alarm_role" {
+  name = "${var.project_name}-slack-alarm-role"
+  assume_role_policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      Statement : [
+        {
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
+          Sid    = ""
+          Principal = {
+            Service = "lambda.amazonaws.com"
+          }
+        },
+      ]
+    }
+  )
+}
+
+resource "aws_iam_policy" "sns_trigger_lambda" {
+  name        = "${var.project_name}-slack-alarm-lambda-policy"
+  description = "sns가 lambda를 트리거하기 위한 정책"
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "lambda:InvokeFunction"
+          ],
+          "Resource" : aws_sns_topic.app_error.arn
+        }
+      ]
+    }
+  )
+
+}
+
+
+resource "aws_iam_role_policy_attachment" "sns_trigger_lambda" {
+  role       = aws_iam_role.slack_alarm_role.name
+  policy_arn = aws_iam_policy.sns_trigger_lambda.arn
+}
 
 
