@@ -24,12 +24,10 @@ func main() {
 	addr := os.Getenv("APP_PORT")
 
 	if addr == "" {
-		addr = "8000"
+		addr = "8080"
 	}
 
 	log.Infof("Starting server on :%s", addr)
-
-	log.Printf("Starting server on :%s\n", addr)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", addr), router)
 
