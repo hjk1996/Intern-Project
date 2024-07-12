@@ -52,6 +52,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		msg := "No employee ID found in URL"
 		http.Error(w, msg, http.StatusBadRequest)
 		logger.Info(msg)
+		return 
 	}
 
 	var employee models.Employee
