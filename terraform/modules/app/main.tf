@@ -194,7 +194,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = local.container_name
-      image     = "${aws_ecr_repository.app.repository_url}:prod"
+      image     = "${aws_ecr_repository.app.repository_url}:latest"
       cpu       = 10
       memory    = 512
       essential = true
@@ -236,16 +236,16 @@ resource "aws_ecs_task_definition" "app" {
         }
       }
 
-      healthCheck = {
-        retries = 3
-        command = [
-          "CMD-SHELL",
-          "curl -f http://localhost:${var.app_port}/ || exit 1"
-        ]
-        timeout     = 5
-        interval    = 30
-        startPeriod = null
-      }
+      # healthCheck = {
+      #   retries = 3
+      #   command = [
+      #     "CMD-SHELL",
+      #     "curl -f http://localhost:${var.app_port}/ || exit 1"
+      #   ]
+      #   timeout     = 5
+      #   interval    = 30
+      #   startPeriod = null
+      # }
     }
   ])
 }
