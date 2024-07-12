@@ -235,6 +235,17 @@ resource "aws_ecs_task_definition" "app" {
           awslogs-stream-prefix = "ecs"
         }
       }
+
+      healthCheck = {
+        retries = 3
+        command = [
+          "CMD-SHELL",
+          "curl -f http://localhost:${var.app_port}/ || exit 1"
+        ]
+        timeout     = 5
+        interval    = 30
+        startPeriod = null
+      }
     }
   ])
 }
