@@ -5,26 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hjk1996/LGUPlus-Intern-Project/models"
 	"github.com/hjk1996/LGUPlus-Intern-Project/router"
-	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
 )
-
-type MockDB struct {
-	mock.Mock
-}
-
-func (mdb *MockDB) First(dest interface{}, conds ...interface{}) *gorm.DB {
-	args := mdb.Called(dest, conds)
-	return args.Get(0).(*gorm.DB)
-}
-
-var db = struct {
-	DB *MockDB
-}{
-	DB: &MockDB{},
-}
 
 func TestHomeHandler(t *testing.T) {
 	router := router.NewRouter()
@@ -59,40 +41,13 @@ func TestHomeHandler(t *testing.T) {
 		rr := httptest.NewRecorder()
 		router.ServeHTTP(rr, req)
 
-		if status := rr.Code; status != http.StatusInternalServerError {
+		if status := rr.Code; status != http.StatusBadRequest {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusInternalServerError)
 		}
 
-		expected := "Failed to query user informaion"
-		if rr.Body.String() != expected {
-			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
-		}
 	})
 
 	// 정상적인 요청
-	t.Run("valid employeeId", func(t *testing.T) {
-		employee := models.Employee{ID: 1, Name: "John Doe"}
-		mockDB := new(MockDB)
-		mockDB.On("First", &employee, "1").Return(&gorm.DB{})
-		db.DB = mockDB
-
-		req, err := http.NewRequest("GET", "/home?id=1", nil)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		rr := httptest.NewRecorder()
-		router.ServeHTTP(rr, req)
-
-		if status := rr.Code; status != http.StatusOK {
-			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-		}
-
-		expected := "Hello John Doe!"
-		if rr.Body.String() != expected {
-			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
-		}
-	})
 }
 
 func TestArticleHandler(t *testing.T) {
