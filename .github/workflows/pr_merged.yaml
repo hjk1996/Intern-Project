@@ -9,6 +9,8 @@ on:
       - ".github/**"
 
   pull_request:
+    branches:
+      - main
     types: [closed]
     paths:
       - "app/**"
