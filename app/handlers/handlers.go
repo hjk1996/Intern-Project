@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
-	log "github.com/sirupsen/logrus"
-
+	"github.com/go-sql-driver/mysql"
 	"github.com/hjk1996/LGUPlus-Intern-Project/db"
 	"github.com/hjk1996/LGUPlus-Intern-Project/models"
+	log "github.com/sirupsen/logrus"
 )
 
 func logRequest(r *http.Request) *log.Entry {
@@ -48,16 +48,32 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	employeeId := query.Get("id")
 
+	if employeeId == "" {
+		msg := "No employee ID found in URL"
+		http.Error(w, msg, http.StatusBadRequest)
+		logger.Info(msg)
+	}
+
 	var employee models.Employee
 
 	result := db.DB.First(&employee, employeeId)
 
 	if result.Error != nil {
-		msg := "Failed to query user informaion"
-		http.Error(w, msg, http.StatusInternalServerError)
-		logger.WithError(result.Error).Error(msg)
+		if mysqlErr, ok := result.Error.(*mysql.MySQLError); ok {
+			switch mysqlErr.Number {
+			default:
+				msg := "Something went wrong"
+				http.Error(w, msg, http.StatusInternalServerError)
+				logger.WithError(result.Error).Error(msg)
+				return
+			}
+		} else {
+			msg := "Something went wrong"
+			http.Error(w, msg, http.StatusInternalServerError)
+			logger.WithError(result.Error).Error(msg)
+			return
+		}
 
-		return
 	}
 
 	w.Header().Set("Content-Type", "text/plan")
@@ -101,7 +117,13 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := "Failed to parse request body"
 		http.Error(w, msg, http.StatusBadRequest)
-		log.WithError(err).Error(msg)
+		logger.WithError(err).Error(msg)
+		return
+	}
+
+	if writeBody.Content == "" {
+		msg := "Empty body content"
+		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
 

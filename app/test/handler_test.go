@@ -21,9 +21,9 @@ func (mdb *MockDB) First(dest interface{}, conds ...interface{}) *gorm.DB {
 }
 
 var db = struct {
-	ReplicaDB *MockDB
+	DB *MockDB
 }{
-	ReplicaDB: &MockDB{},
+	DB: &MockDB{},
 }
 
 func TestHomeHandler(t *testing.T) {
@@ -63,7 +63,7 @@ func TestHomeHandler(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusInternalServerError)
 		}
 
-		expected := "Failed to query user information\n"
+		expected := "Failed to query user informaion"
 		if rr.Body.String() != expected {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
@@ -74,7 +74,7 @@ func TestHomeHandler(t *testing.T) {
 		employee := models.Employee{ID: 1, Name: "John Doe"}
 		mockDB := new(MockDB)
 		mockDB.On("First", &employee, "1").Return(&gorm.DB{})
-		db.ReplicaDB = mockDB
+		db.DB = mockDB
 
 		req, err := http.NewRequest("GET", "/home?id=1", nil)
 		if err != nil {
@@ -92,5 +92,30 @@ func TestHomeHandler(t *testing.T) {
 		if rr.Body.String() != expected {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
+	})
+}
+
+func TestArticleHandler(t *testing.T) {
+	router := router.NewRouter()
+
+	t.Run("method not allowed", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/article", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusMethodNotAllowed {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusMethodNotAllowed)
+		}
+
+		expected := "Method not allowed"
+
+		if expected != rr.Body.String() {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+
 	})
 }
