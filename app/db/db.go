@@ -14,6 +14,7 @@ import (
 
 var DB *gorm.DB
 
+// TODO db init할 때 dummy data 삽입하기
 func Init() {
 	dbSecretName := os.Getenv("DB_SECRET_NAME")
 	readerEndpoint := os.Getenv("READER_ENDPOINT")
@@ -53,5 +54,13 @@ func Init() {
 	}
 
 	DB.AutoMigrate(&models.Employee{}, &models.Article{})
+
+	var employee models.Employee
+
+	result := DB.First(&employee, "1")
+	// TODO: 데이터 없을 때 데이터 추가하기
+	if result.Error != nil {
+
+	}
 
 }
