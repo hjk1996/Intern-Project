@@ -28,10 +28,10 @@ resource "aws_ecr_lifecycle_policy" "app" {
       "rules" : [
         {
           "rulePriority" : 10,
-          "description" : "prod 태그가 붙은 이미지는 1개만 저장",
+          "description" : "latest 태그가 붙은 이미지는 1개만 저장",
           "selection" : {
             "tagStatus" : "tagged",
-            "tagPrefixList" : ["prod"],
+            "tagPrefixList" : ["latest"],
             "countType" : "imageCountMoreThan",
             "countNumber" : 1
           },
