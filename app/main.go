@@ -17,6 +17,7 @@ func init() {
 }
 
 func main() {
+
 	db.Init()
 
 	router := router.NewRouter()
@@ -26,12 +27,15 @@ func main() {
 		addr = "8000"
 	}
 
+	log.Infof("Starting server on :%s", addr)
+
 	log.Printf("Starting server on :%s\n", addr)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", addr), router)
 
 	if err != nil {
-		log.Fatalf("failed to start server: %v\n", err)
+		log.Fatalf("Failed to start server: %v", err)
+
 	}
 
 }
