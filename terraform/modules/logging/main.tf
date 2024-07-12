@@ -284,7 +284,7 @@ resource "aws_scheduler_schedule" "cloudwatch_log_s3_export" {
   # 분 시 일 월 요일 년
   # ?는 특정 요일이 없다는 뜻임
   # schedule_expression = "rate(5 minutes)"
-  schedule_expression = "cron(5 * * * ? *)"
+  schedule_expression = "cron(* 1 * * ? *)"
 
   target {
     # event bridge가 스케쥴마다 트리거할 대상
@@ -296,12 +296,38 @@ resource "aws_scheduler_schedule" "cloudwatch_log_s3_export" {
 
 resource "aws_cloudwatch_log_metric_filter" "app_error" {
   name           = "${var.project_name}-app-error-log-filter"
-  pattern        = ""
+  pattern        = "{ $.level = \"error\" }"
   log_group_name = aws_cloudwatch_log_group.app.name
 
   metric_transformation {
-    name      = "EventCount"
-    namespace = "YourNamespace"
+    name      = "ErrorCount"
+    namespace = "${var.project_name}"
     value     = "1"
   }
 }
+resource "aws_cloudwatch_metric_alarm" "app_error_alarm" {
+  alarm_name = "${var.project_name}-app-error-alarm"
+  metric_name         = aws_cloudwatch_log_metric_filter.app_error.name
+  threshold           = "0"
+  statistic           = "Sum"
+  comparison_operator = "GreaterThanThreshold"
+  datapoints_to_alarm = "1"
+  evaluation_periods  = "1"
+  period              = "60"
+  namespace           = var.project_name
+  alarm_actions       = [aws_sns_topic.app_error.arn]
+}
+
+resource "aws_sns_topic" "app_error" {
+  name = "${var.project_name}-app-error-topic"
+}
+
+# resource "aws_sns_topic_subscription" "app_error_metric" {
+#   topic_arn = aws_sns_topic.app_error.arn
+
+# }
+
+
+
+
+
