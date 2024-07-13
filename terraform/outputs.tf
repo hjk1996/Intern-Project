@@ -18,3 +18,8 @@ output "ecr_address" {
 output "lb_dns" {
   value = module.app_module.lb_dns
 }
+
+
+output "k6_dns" {
+  value = module.load_test_module.k6_dns
+}

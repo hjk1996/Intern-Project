@@ -454,12 +454,12 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_alarm" {
   actions_enabled     = true
 
   dimensions = {
-    ClusterName = var.ecs_cluster_name  # ECS 클러스터 이름
-    ServiceName = var.ecs_service_name  # ECS 서비스 이름
+    ClusterName = var.ecs_cluster_name # ECS 클러스터 이름
+    ServiceName = var.ecs_service_name # ECS 서비스 이름
   }
 
   alarm_actions = [
-    aws_sns_topic.app_error.arn  # 알람이 발생했을 때 알림을 받을 SNS 주제 ARN
+    aws_sns_topic.app_error.arn # 알람이 발생했을 때 알림을 받을 SNS 주제 ARN
   ]
 
   ok_actions = [
@@ -482,14 +482,14 @@ resource "aws_cloudwatch_metric_alarm" "service_memory_alarm" {
   actions_enabled     = true
 
   dimensions = {
-    ClusterName = var.ecs_cluster_name  # ECS 클러스터 이름
-    ServiceName = var.ecs_service_name  # ECS 서비스 이름
+    ClusterName = var.ecs_cluster_name # ECS 클러스터 이름
+    ServiceName = var.ecs_service_name # ECS 서비스 이름
   }
 
   alarm_actions = [
-    aws_sns_topic.app_error.arn  # 알람이 발생했을 때 알림을 받을 SNS 주제 ARN
+    aws_sns_topic.app_error.arn # 알람이 발생했을 때 알림을 받을 SNS 주제 ARN
   ]
-  
+
   ok_actions = [
     aws_sns_topic.app_error.arn
   ]

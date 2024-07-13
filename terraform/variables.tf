@@ -30,7 +30,7 @@ variable "ssh_key_path" {
 }
 
 variable "app_port" {
-  type = number
+  type    = number
   default = 8080
 }
 
@@ -43,12 +43,12 @@ variable "slack_channel" {
 }
 
 variable "min_task_count" {
-  type = number
+  type    = number
   default = 3
 }
 
 variable "max_task_count" {
-  type = number
+  type    = number
   default = 10
 }
 

@@ -2,6 +2,8 @@ data "aws_region" "current" {
 
 }
 
+
+
 // bastion 보안 그룹
 resource "aws_security_group" "bastion" {
   name   = "${var.project_name}-bastion-sg"

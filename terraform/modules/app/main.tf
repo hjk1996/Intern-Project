@@ -380,7 +380,7 @@ resource "aws_appautoscaling_target" "ecs" {
   min_capacity       = var.min_task_count
   resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.app.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  service_namespace = "ecs" 
+  service_namespace  = "ecs"
 }
 
 resource "aws_appautoscaling_policy" "cpu_scaling_policy" {
@@ -391,7 +391,7 @@ resource "aws_appautoscaling_policy" "cpu_scaling_policy" {
   service_namespace  = aws_appautoscaling_target.ecs.service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value       = 0.8
+    target_value = 0.8
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
