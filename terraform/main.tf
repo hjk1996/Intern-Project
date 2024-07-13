@@ -37,6 +37,8 @@ module "logging_module" {
   project_name      = var.project_name
   slack_webhook_url = var.slack_webhook_url
   slack_channel     = var.slack_channel
+  ecs_cluster_name = module.app_module.ecs_cluster_name
+  ecs_service_name = module.app_module.ecs_service_name
 }
 
 module "db_module" {

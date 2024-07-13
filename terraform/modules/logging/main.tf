@@ -440,7 +440,30 @@ resource "aws_iam_role_policy_attachment" "sns_trigger_lambda" {
 
 
 
-// ecs 서비스의 평균적인 cpu 사용량이 ~~를 초과하면 전송되는 알람
+// ecs 서비스의 평균적인 cpu 사용량이 80를 초과하면 전송되는 알람
+resource "aws_cloudwatch_metric_alarm" "service_cpu_alarm" {
+  alarm_name          = "ECSServiceAverageCPUUtilization"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "2" # 연속된 두 평가 기간 동안 조건이 충족되어야 합니다.
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "30" # 30초마다 메트릭을 수집합니다.
+  statistic           = "Average"
+  threshold           = "80" # CPU 사용량이 80%를 초과할 때 알람
+  alarm_description   = "This alarm monitors the average CPU utilization of the ECS service."
+  actions_enabled     = true
+
+  dimensions = {
+    ClusterName = var.ecs_cluster_name  # ECS 클러스터 이름
+    ServiceName = var.ecs_service_name  # ECS 서비스 이름
+  }
+
+  alarm_actions = [
+    aws_sns_topic.app_error.arn  # 알람이 발생했을 때 알림을 받을 SNS 주제 ARN
+  ]
+
+}
+
 
 
 
