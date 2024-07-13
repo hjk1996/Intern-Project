@@ -57,7 +57,7 @@ func Init() {
 
 	var employee models.Employee
 
-	result := DB.First(&employee, "1")
+	result := DB.First(&employee, 1)
 	// TODO: 데이터 없을 때 데이터 추가하기
 	if result.Error != nil {
 		log.Println("No data found in Employee table, inserting dummy data...")
@@ -98,6 +98,13 @@ func insertDummyData(db *gorm.DB) error {
 
 	// 스토어드 프로시저 실행 쿼리
 	callProcedureSQL := `CALL InsertDummyData();`
+
+	if err := db.Exec(createProcedureSQL).Error; err != nil {
+		return fmt.Errorf("failed to create stored procedure: %w", err)
+	}
+	if err := db.Exec(callProcedureSQL).Error; err != nil {
+		return fmt.Errorf("failed to call stored procedure: %w", err)
+	}
 
 	// 스토어드 프로시저를 먼저 생성하고 호출
 	db.Exec(createProcedureSQL)

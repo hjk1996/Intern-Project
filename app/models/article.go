@@ -13,3 +13,7 @@ type Article struct {
 	Content    string
 	CreatedAt  time.Time
 }
+
+func (Article) TableName() string {
+	return "articles"
+}

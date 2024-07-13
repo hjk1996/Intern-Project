@@ -92,6 +92,5 @@ module "app_module" {
   depends_on = [
     module.vpc_module,
     module.db_module,
-    module.logging_module
   ]
 }

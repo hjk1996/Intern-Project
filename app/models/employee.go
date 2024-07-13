@@ -10,3 +10,7 @@ type Employee struct {
 	Name     string
 	Articles []Article `gorm:"foreignKey:EmployeeID"`
 }
+
+func (Employee) TableName() string {
+	return "employees"
+}
