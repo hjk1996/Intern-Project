@@ -68,36 +68,35 @@ func Init() {
 	}
 
 }
-
 func insertDummyData(db *gorm.DB) error {
-	// 더미 데이터 삽입 SQL
-	dummyDataSQL := `
-	DELIMITER //
-
+	// 스토어드 프로시저 생성 쿼리
+	createProcedureSQL := `
 	CREATE PROCEDURE InsertDummyData()
 	BEGIN
 		DECLARE i INT DEFAULT 1;
-		
 		WHILE i <= 5000 DO
 			-- Employee 생성
 			INSERT INTO Employee (Name) VALUES (CONCAT('Employee', i));
-			
 			-- 최근 생성된 Employee ID 가져오기
 			SET @employee_id = LAST_INSERT_ID();
-			
 			-- Article 생성
 			INSERT INTO Article (EmployeeID, Content) VALUES (@employee_id, CONCAT('Article content for employee ', i));
-			
 			-- 다음 반복으로 증가
 			SET i = i + 1;
 		END WHILE;
-	END //
-
-	DELIMITER ;
-
-	CALL InsertDummyData();
+	END;
 	`
 
-	// 더미 데이터 삽입
-	return db.Exec(dummyDataSQL).Error
+	// 스토어드 프로시저 실행 쿼리
+	callProcedureSQL := `CALL InsertDummyData();`
+
+	// 스토어드 프로시저를 먼저 생성하고 호출
+	if err := db.Exec(createProcedureSQL).Error; err != nil {
+		return err
+	}
+	if err := db.Exec(callProcedureSQL).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
