@@ -14,3 +14,6 @@ output "ecs_service_name" {
   value = aws_ecs_service.app.name
 }
 
+output "cpu_alarm_arn" {
+  value = aws_appautoscaling_policy.cpu_scaling_policy.alarm_arns[0]
+}

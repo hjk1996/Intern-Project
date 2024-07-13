@@ -462,6 +462,11 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_alarm" {
     aws_sns_topic.app_error.arn  # 알람이 발생했을 때 알림을 받을 SNS 주제 ARN
   ]
 
+  ok_actions = [
+    aws_sns_topic.app_error.arn
+  ]
+
+
 }
 
 resource "aws_cloudwatch_metric_alarm" "service_memory_alarm" {
@@ -484,10 +489,12 @@ resource "aws_cloudwatch_metric_alarm" "service_memory_alarm" {
   alarm_actions = [
     aws_sns_topic.app_error.arn  # 알람이 발생했을 때 알림을 받을 SNS 주제 ARN
   ]
+  
+  ok_actions = [
+    aws_sns_topic.app_error.arn
+  ]
 
 }
-
-
 
 
 
