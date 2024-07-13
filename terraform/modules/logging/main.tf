@@ -14,7 +14,7 @@ locals {
   slack_alarm_lambda_name = "slack-alarm-lambda"
 }
 
-
+// ---
 // cloudwatch log
 resource "aws_cloudwatch_log_group" "app" {
   name = "${var.project_name}-application-log-group"
@@ -67,8 +67,7 @@ resource "aws_s3_bucket_policy" "app_log" {
   )
 }
 
-
-
+// 장기 로그 저장하는 버킷 라이프사이클 폴리시
 resource "aws_s3_bucket_lifecycle_configuration" "app_log_config" {
   bucket = aws_s3_bucket.app_log.id
 
@@ -88,8 +87,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "app_log_config" {
 
   }
 }
+// ---
 
 
+// ---
 // cloudwatch log에 자체적인 log group을 생성하고, log를 읽고 쓰기 위한 lambda 함수의 권한
 resource "aws_iam_policy" "cloudwatch_log" {
   name        = "${var.project_name}-app-cloudwatch-log-policy"
@@ -299,7 +300,11 @@ resource "aws_scheduler_schedule" "cloudwatch_log_s3_export" {
     role_arn = aws_iam_role.lambda_trigger_scheduler.arn
   }
 }
+// ---
 
+
+// ---
+// 애플리케이션에 에러에 대한 메트릭 필터
 resource "aws_cloudwatch_log_metric_filter" "app_error" {
   name           = "${var.project_name}-app-error-log-filter"
   pattern        = "{ $.level = \"error\" }"
@@ -314,7 +319,7 @@ resource "aws_cloudwatch_log_metric_filter" "app_error" {
 
 }
 
-// cloudwatch app error log alarm
+// 애플리케이션 에러 로그 알람
 resource "aws_cloudwatch_metric_alarm" "app_error_alarm" {
   alarm_name          = "${var.project_name}-app-error-alarm"
   alarm_description   = "application 에러 로그에 대한 알람"
@@ -331,8 +336,6 @@ resource "aws_cloudwatch_metric_alarm" "app_error_alarm" {
   actions_enabled = true
   alarm_actions   = [aws_sns_topic.app_error.arn]
 
-
-
 }
 
 // 에러 로그가 전송되는 SNS
@@ -347,6 +350,7 @@ resource "aws_sns_topic_subscription" "slack_lambda" {
 }
 
 
+// 알람 발생하면 slack으로 알람 보내는 람다
 data "archive_file" "slack_alarm_lambda" {
   type        = "zip"
   source_file = "${path.module}/${local.slack_alarm_lambda_name}/lambda_function.py"
@@ -388,9 +392,7 @@ resource "aws_lambda_permission" "allow_sns" {
 }
 
 
-
-
-
+// slack channel에 alarm을 보내기 위한 lambda의 iam role
 resource "aws_iam_role" "slack_alarm_role" {
   name = "${var.project_name}-slack-alarm-role"
   assume_role_policy = jsonencode(
@@ -435,5 +437,20 @@ resource "aws_iam_role_policy_attachment" "sns_trigger_lambda" {
   role       = aws_iam_role.slack_alarm_role.name
   policy_arn = aws_iam_policy.sns_trigger_lambda.arn
 }
+
+
+
+// ecs 서비스의 평균적인 cpu 사용량이 ~~를 초과하면 전송되는 알람
+
+
+
+
+// ecs 서비스의 평균적인 메모리 사용량이 ~~를 초과하면 전송되는 알람
+
+
+
+
+
+
 
 

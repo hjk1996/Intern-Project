@@ -61,14 +61,23 @@ func Init() {
 	// TODO: 데이터 없을 때 데이터 추가하기
 	if result.Error != nil {
 		log.Println("No data found in Employee table, inserting dummy data...")
-		err = insertDummyData(DB)
-		if err != nil {
-			log.Fatalf("Failed to insert dummy data: %v", err)
-		}
+		insertDummyData(DB)
+
 	}
 
 }
+
 func insertDummyData(db *gorm.DB) error {
+	// **먼저 데이터가 있는지 확인하는 쿼리**
+	var count int64
+	db.Table("Employee").Count(&count)
+
+	// **데이터가 있으면 더미 데이터 삽입을 생략**
+	if count > 0 {
+		log.Println("Data already exists, skipping dummy data insertion.")
+		return nil
+	}
+
 	// 스토어드 프로시저 생성 쿼리
 	createProcedureSQL := `
 	CREATE PROCEDURE InsertDummyData()
