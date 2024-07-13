@@ -16,6 +16,11 @@ resource "aws_ecr_repository" "app" {
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  // ECR은 terraform destroy 되더라도 변경되게 설정
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 // ECR 리포지토리 라이프사이클 정책

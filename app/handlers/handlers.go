@@ -88,7 +88,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type ArticleBody struct {
-	EmployeeID uint `json:employee_id`
+	EmployeeID uint `json:"employee_id"`
 	Content    string `json:"content"`
 }
 
