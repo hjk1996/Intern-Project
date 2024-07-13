@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/hjk1996/LGUPlus-Intern-Project/db"
