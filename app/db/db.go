@@ -70,7 +70,7 @@ func Init() {
 func insertDummyData(db *gorm.DB) error {
 	// **먼저 데이터가 있는지 확인하는 쿼리**
 	var count int64
-	db.Table("Employee").Count(&count)
+	db.Table("employees").Count(&count)
 
 	// **데이터가 있으면 더미 데이터 삽입을 생략**
 	if count > 0 {
@@ -85,11 +85,11 @@ func insertDummyData(db *gorm.DB) error {
 		DECLARE i INT DEFAULT 1;
 		WHILE i <= 5000 DO
 			-- Employee 생성
-			INSERT INTO Employee (Name) VALUES (CONCAT('Employee', i));
+			INSERT INTO employees (name) VALUES (CONCAT('employee', '_', i));
 			-- 최근 생성된 Employee ID 가져오기
 			SET @employee_id = LAST_INSERT_ID();
 			-- Article 생성
-			INSERT INTO Article (EmployeeID, Content) VALUES (@employee_id, CONCAT('Article content for employee ', i));
+			INSERT INTO articles (employee_id, content) VALUES (@employee_id, CONCAT('Article content for employee ', i));
 			-- 다음 반복으로 증가
 			SET i = i + 1;
 		END WHILE;
