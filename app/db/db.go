@@ -60,8 +60,44 @@ func Init() {
 	result := DB.First(&employee, "1")
 	// TODO: 데이터 없을 때 데이터 추가하기
 	if result.Error != nil {
-
-        
+		log.Println("No data found in Employee table, inserting dummy data...")
+		err = insertDummyData(DB)
+		if err != nil {
+			log.Fatalf("Failed to insert dummy data: %v", err)
+		}
 	}
 
+}
+
+func insertDummyData(db *gorm.DB) error {
+	// 더미 데이터 삽입 SQL
+	dummyDataSQL := `
+	DELIMITER //
+
+	CREATE PROCEDURE InsertDummyData()
+	BEGIN
+		DECLARE i INT DEFAULT 1;
+		
+		WHILE i <= 5000 DO
+			-- Employee 생성
+			INSERT INTO Employee (Name) VALUES (CONCAT('Employee', i));
+			
+			-- 최근 생성된 Employee ID 가져오기
+			SET @employee_id = LAST_INSERT_ID();
+			
+			-- Article 생성
+			INSERT INTO Article (EmployeeID, Content) VALUES (@employee_id, CONCAT('Article content for employee ', i));
+			
+			-- 다음 반복으로 증가
+			SET i = i + 1;
+		END WHILE;
+	END //
+
+	DELIMITER ;
+
+	CALL InsertDummyData();
+	`
+
+	// 더미 데이터 삽입
+	return db.Exec(dummyDataSQL).Error
 }
