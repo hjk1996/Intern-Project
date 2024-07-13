@@ -61,7 +61,10 @@ func Init() {
 	// TODO: 데이터 없을 때 데이터 추가하기
 	if result.Error != nil {
 		log.Println("No data found in Employee table, inserting dummy data...")
-		insertDummyData(DB)
+		err := insertDummyData(DB)
+		if err != nil {
+			fmt.Printf("something went wrong while inserting data to db: %v\n", err)
+		}
 
 	}
 
@@ -107,8 +110,6 @@ func insertDummyData(db *gorm.DB) error {
 	}
 
 	// 스토어드 프로시저를 먼저 생성하고 호출
-	db.Exec(createProcedureSQL)
-	db.Exec(callProcedureSQL)
 
 	return nil
 }
