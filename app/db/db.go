@@ -100,12 +100,8 @@ func insertDummyData(db *gorm.DB) error {
 	callProcedureSQL := `CALL InsertDummyData();`
 
 	// 스토어드 프로시저를 먼저 생성하고 호출
-	if err := db.Exec(createProcedureSQL).Error; err != nil {
-		return err
-	}
-	if err := db.Exec(callProcedureSQL).Error; err != nil {
-		return err
-	}
+	db.Exec(createProcedureSQL)
+	db.Exec(callProcedureSQL)
 
 	return nil
 }
