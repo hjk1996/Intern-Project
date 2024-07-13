@@ -60,3 +60,13 @@ variable "db_writer_endpoint" {
 variable "db_name" {
   type = string
 }
+
+variable "min_task_count" {
+  type = number
+}
+
+variable "max_task_count" {
+  type = number
+}
+
+

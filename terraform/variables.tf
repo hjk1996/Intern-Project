@@ -31,6 +31,7 @@ variable "ssh_key_path" {
 
 variable "app_port" {
   type = number
+  default = 8080
 }
 
 variable "slack_webhook_url" {
@@ -40,3 +41,17 @@ variable "slack_webhook_url" {
 variable "slack_channel" {
   type = string
 }
+
+variable "min_task_count" {
+  type = number
+  default = 3
+}
+
+variable "max_task_count" {
+  type = number
+  default = 10
+}
+
+
+
+

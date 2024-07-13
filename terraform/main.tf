@@ -89,6 +89,9 @@ module "app_module" {
   db_secret_arn         = module.db_module.db_secret_arn
   db_writer_endpoint    = module.db_module.db_writer_endpoint
 
+  min_task_count = var.min_task_count
+  max_task_count = var.max_task_count
+
   depends_on = [
     module.vpc_module,
     module.db_module,
