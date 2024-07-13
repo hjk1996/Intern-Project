@@ -81,6 +81,13 @@ func insertDummyData(db *gorm.DB) error {
 		return nil
 	}
 
+	dropProcedureSQL := `DROP PROCEDURE IF EXISTS InsertDummyData;`
+	db.Exec(dropProcedureSQL)
+
+
+
+
+    
 	// 스토어드 프로시저 생성 쿼리
 	createProcedureSQL := `
 	CREATE PROCEDURE InsertDummyData()
@@ -102,7 +109,7 @@ func insertDummyData(db *gorm.DB) error {
 	// 스토어드 프로시저 실행 쿼리
 	callProcedureSQL := `CALL InsertDummyData();`
 
-    db.Exec(createProcedureSQL)
+	db.Exec(createProcedureSQL)
 	if err := db.Exec(callProcedureSQL).Error; err != nil {
 		return fmt.Errorf("failed to call stored procedure: %w", err)
 	}
