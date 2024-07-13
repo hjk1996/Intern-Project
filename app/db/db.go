@@ -102,9 +102,7 @@ func insertDummyData(db *gorm.DB) error {
 	// 스토어드 프로시저 실행 쿼리
 	callProcedureSQL := `CALL InsertDummyData();`
 
-	if err := db.Exec(createProcedureSQL).Error; err != nil {
-		return fmt.Errorf("failed to create stored procedure: %w", err)
-	}
+    db.Exec(createProcedureSQL)
 	if err := db.Exec(callProcedureSQL).Error; err != nil {
 		return fmt.Errorf("failed to call stored procedure: %w", err)
 	}
