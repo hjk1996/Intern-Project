@@ -89,7 +89,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type ArticleBody struct {
-	Content string `json:"content"`
+	EmployeeID uint `json:employee_id`
+	Content    string `json:"content"`
 }
 
 // DB에 article write하는 handler
@@ -130,21 +131,10 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := r.URL.Query()
-	idStr := query.Get("id")
-	employeeId, err := strconv.ParseUint(idStr, 10, 32)
-	employeeIdUint := uint(employeeId)
 
-	if err != nil {
-		msg := "Invalid employee id"
-		http.Error(w, msg, http.StatusBadRequest)
-		log.WithError(err).Error(msg)
-		return
-
-	}
 
 	article := models.Article{
-		EmployeeID: employeeIdUint,
+		EmployeeID: writeBody.EmployeeID,
 		Content:    writeBody.Content,
 	}
 
@@ -162,7 +152,7 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Successfully wrote the article"))
 
 	logger.WithFields(log.Fields{
-		"employeeId": employeeId,
+		"employeeId": writeBody.EmployeeID,
 	}).Info("ArticleHandler completed successfully")
 
 }
