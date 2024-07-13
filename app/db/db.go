@@ -61,6 +61,7 @@ func Init() {
 	// TODO: 데이터 없을 때 데이터 추가하기
 	if result.Error != nil {
 
+        
 	}
 
 }
