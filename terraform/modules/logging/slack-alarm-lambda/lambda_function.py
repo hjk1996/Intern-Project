@@ -24,7 +24,7 @@ def lambda_handler(event, context):
     region = message["Region"]
     resource_type = message.get("Trigger", {}).get("Namespace", "Unknown")
 
-    formatted_time = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
+    formatted_time = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%f%z").strftime(
         "%Y-%m-%d %H:%M:%S"
     )
 
