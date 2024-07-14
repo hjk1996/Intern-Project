@@ -115,6 +115,5 @@ func insertDummyData(db *gorm.DB) error {
 	}
 
 	// 스토어드 프로시저를 먼저 생성하고 호출
-
 	return nil
 }
