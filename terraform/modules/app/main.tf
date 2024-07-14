@@ -10,7 +10,7 @@ locals {
 // ECR 리포지토리
 resource "aws_ecr_repository" "app" {
   name                 = local.container_name
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "IMMUTABLE"
   force_delete         = true
 
   image_scanning_configuration {
@@ -18,9 +18,9 @@ resource "aws_ecr_repository" "app" {
   }
 
   // ECR은 terraform destroy 되더라도 변경되게 설정
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 // ECR 리포지토리 라이프사이클 정책
