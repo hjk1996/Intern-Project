@@ -92,6 +92,14 @@ module "app_module" {
   min_task_count = var.min_task_count
   max_task_count = var.max_task_count
 
+  ecs_task_cpu               = var.ecs_task_cpu
+  ecs_task_memory            = var.ecs_task_memory
+  ecs_cpu_utilization_target = var.ecs_cpu_utilization_target
+  ecs_scale_in_cooldown      = var.ecs_scale_in_cooldown
+  ecs_scale_out_cooldown     = var.ecs_scale_out_cooldown
+
+
+
   depends_on = [
     module.vpc_module,
     module.db_module,

@@ -16,12 +16,26 @@ export let options = {
       preAllocatedVUs: 50, // 필요한 VUs 수
       maxVUs: 500, // 최대 VUs 수
       stages: [
-        { target: 100, duration: "2m" }, // 2분 동안 초당 100개 요청까지 증가
-        { target: 200, duration: "2m" }, // 2분 동안 초당 200개 요청까지 증가
-        { target: 300, duration: "2m" }, // 2분 동안 초당 300개 요청까지 증가
-        { target: 360, duration: "2m" }, // 2분 동안 초당 420개 요청까지 증가
-        { target: 420, duration: "2m" }, // 5분 동안 초당 420개 요청 유지
-        { target: 0, duration: "2m" }, // 2분 동안 초당 0개 요청까지 감소
+        { target: 50, duration: "2m" },
+        { target: 100, duration: "2m" },
+        { target: 150, duration: "2m" },
+        { target: 200, duration: "2m" },
+        { target: 250, duration: "2m" },
+        { target: 300, duration: "2m" },
+        { target: 350, duration: "2m" },
+        { target: 400, duration: "2m" },
+        { target: 500, duration: "2m" },
+        { target: 600, duration: "2m" },
+        { target: 700, duration: "2m" },
+        { target: 800, duration: "2m" },
+        { target: 900, duration: "2m" },
+        { target: 1000, duration: "2m" },
+        { target: 1100, duration: "2m" },
+        { target: 1200, duration: "2m" },
+        { target: 1300, duration: "2m" },
+        { target: 1400, duration: "2m" },
+        { target: 1500, duration: "2m" },
+        { target: 1620, duration: "60m" },
       ],
     },
   },

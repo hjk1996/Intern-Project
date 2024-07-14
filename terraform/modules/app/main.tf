@@ -193,8 +193,8 @@ resource "aws_ecs_task_definition" "app" {
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
 
-  cpu    = 256
-  memory = 512
+  cpu    = var.ecs_task_cpu
+  memory = var.ecs_task_memory
 
   container_definitions = jsonencode([
     {
@@ -391,12 +391,12 @@ resource "aws_appautoscaling_policy" "cpu_scaling_policy" {
   service_namespace  = aws_appautoscaling_target.ecs.service_namespace
 
   target_tracking_scaling_policy_configuration {
-    target_value = 0.8
+    target_value = var.ecs_cpu_utilization_target
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
-    scale_in_cooldown  = 300
-    scale_out_cooldown = 300
+    scale_in_cooldown  = var.ecs_scale_in_cooldown
+    scale_out_cooldown = var.ecs_scale_out_cooldown
   }
 }
 

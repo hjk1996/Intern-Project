@@ -131,8 +131,8 @@ resource "aws_instance" "k6" {
 
 
   provisioner "file" {
-    source      = "${path.module}/load_test.js"
-    destination = "/home/ubuntu/load_test.js"
+    source      = "${path.module}/stress_test.js"
+    destination = "/home/ubuntu/stress_test.js"
 
     connection {
       type        = "ssh"
@@ -141,6 +141,20 @@ resource "aws_instance" "k6" {
       host        = self.public_ip
     }
   }
+
+  provisioner "file" {
+    source      = "${path.module}/spike_test.js"
+    destination = "/home/ubuntu/spike_test.js"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.k6_key_path)
+      host        = self.public_ip
+    }
+  }
+
+
 
 
   provisioner "remote-exec" {
@@ -164,12 +178,26 @@ resource "aws_instance" "k6" {
 
 resource "null_resource" "load_test_file" {
   triggers = {
-    file_md5 = md5(file("${path.module}/load_test.js"))
+    file_md5_1 = md5(file("${path.module}/stress_test.js"))
+    file_md5_2 = md5(file("${path.module}/spike_test.js"))
   }
 
   provisioner "file" {
-    source      = "${path.module}/load_test.js"
-    destination = "/home/ubuntu/load_test.js"
+    source      = "${path.module}/stress_test.js"
+    destination = "/home/ubuntu/stress_test.js"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.k6_key_path)
+      host        = aws_instance.k6.public_ip
+    }
+  }
+
+
+  provisioner "file" {
+    source      = "${path.module}/spike_test.js"
+    destination = "/home/ubuntu/spike_test.js"
 
     connection {
       type        = "ssh"
@@ -181,7 +209,7 @@ resource "null_resource" "load_test_file" {
 
   provisioner "remote-exec" {
     inline = [
-      "export TARGET_URL=${var.lb_dns}",
+      "echo export TARGET_URL=http://${var.lb_dns} >> etc/profile",
     ]
 
     connection {

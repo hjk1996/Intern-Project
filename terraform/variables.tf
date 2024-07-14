@@ -52,6 +52,31 @@ variable "max_task_count" {
   default = 10
 }
 
+variable "ecs_cpu_utilization_target" {
+  type = number
+}
+
+
+variable "ecs_scale_in_cooldown" {
+  type = number
+}
+
+
+variable "ecs_scale_out_cooldown" {
+  type = number
+}
+
+
+variable "ecs_task_cpu" {
+  type = number
+}
+
+variable "ecs_task_memory" {
+  type = number
+}
+
+
+
 
 
 
