@@ -198,6 +198,7 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id = aws_vpc.main.id
   vpc_endpoint_type = "Gateway"
   service_name = "com.amazonaws.${var.region}.s3"
+  // route table id를 지정하는건 gateway endpoint 타입에서만 가능함
   route_table_ids = aws_route_table.private.*.id
 
   tags = {
@@ -215,6 +216,8 @@ resource "aws_vpc_endpoint" "cloudwatch" {
   security_group_ids = [
     aws_security_group.cloudwatch_vpc_endpoint.id
   ]
+
+
 
   private_dns_enabled = true
   auto_accept         = true
@@ -268,6 +271,8 @@ resource "aws_vpc_endpoint" "secret_manager" {
     aws_security_group.secret_manager_vpc_endpoint.id
   ]
 
+
+
   private_dns_enabled = true
   auto_accept         = true
 
@@ -319,6 +324,8 @@ resource "aws_vpc_endpoint" "ecr" {
   security_group_ids = [
     aws_security_group.secret_manager_vpc_endpoint.id
   ]
+
+
 
   private_dns_enabled = true
   auto_accept         = true
