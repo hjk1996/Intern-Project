@@ -16,8 +16,9 @@ export let options = {
       preAllocatedVUs: 50, // 필요한 VUs 수
       maxVUs: 500, // 최대 VUs 수
       stages: [
-        { target: 420, duration: "5m" },
-        { target: 1620, duration: "5m" },
+        { target: 50, duration: "2m" },
+        { target: 420, duration: "10m" },
+        { target: 1670, duration: "10m" },
       ],
     },
   },
