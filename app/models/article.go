@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
+
 type Article struct {
 	gorm.Model
 	ID         uint `gorm:"primaryKey"`
