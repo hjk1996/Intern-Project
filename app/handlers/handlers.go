@@ -88,8 +88,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type ArticleBody struct {
-	EmployeeID uint   `json:"employee_id"`
-	Content    string `json:"content"`
+	Content string `json:"content"`
 }
 
 // DB에 article write하는 handler
@@ -131,8 +130,7 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	article := models.Article{
-		EmployeeID: writeBody.EmployeeID,
-		Content:    writeBody.Content,
+		Content: writeBody.Content,
 	}
 
 	result := db.DB.Create(&article)
@@ -148,9 +146,7 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Successfully wrote the article"))
 
-	logger.WithFields(log.Fields{
-		"employeeId": writeBody.EmployeeID,
-	}).Info("ArticleHandler completed successfully")
+	logger.Info("ArticleHandler completed successfully")
 
 }
 

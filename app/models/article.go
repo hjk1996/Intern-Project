@@ -9,7 +9,6 @@ import (
 type Article struct {
 	gorm.Model
 	ID         uint `gorm:"primaryKey"`
-	EmployeeID uint `gorm:"column:employee_id"`
 	Content    string
 	CreatedAt  time.Time
 }

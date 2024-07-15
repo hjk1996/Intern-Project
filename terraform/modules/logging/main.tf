@@ -449,7 +449,7 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_alarm" {
   namespace           = "AWS/ECS"
   period              = "30" # 30초마다 메트릭을 수집합니다.
   statistic           = "Average"
-  threshold           = "0.8" # CPU 사용량이 80%를 초과할 때 알람
+  threshold           = "70" # CPU 사용량이 80%를 초과할 때 알람
   alarm_description   = "This alarm monitors the average CPU utilization of the ECS service."
   actions_enabled     = true
 
@@ -477,7 +477,7 @@ resource "aws_cloudwatch_metric_alarm" "service_memory_alarm" {
   namespace           = "AWS/ECS"
   period              = "30" # 30초마다 메트릭을 수집합니다.
   statistic           = "Average"
-  threshold           = "80" # 메모리 사용량이 80%를 초과할 때 알람
+  threshold           = "70" # 메모리 사용량이 80%를 초과할 때 알람
   alarm_description   = "This alarm monitors the average memory utilization of the ECS service."
   actions_enabled     = true
 

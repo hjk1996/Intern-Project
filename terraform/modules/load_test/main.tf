@@ -111,12 +111,18 @@ resource "aws_key_pair" "k6_key" {
 
 resource "aws_instance" "k6" {
   ami               = "ami-062cf18d655c0b1e8" # Ubuntu
-  instance_type     = "t3.medium"
+  instance_type     = "t3.large"
   availability_zone = "${var.region}a"
   subnet_id         = aws_subnet.main.id
   vpc_security_group_ids = [
     aws_security_group.k6_sg.id
   ]
+
+  root_block_device {
+    volume_size = 100
+  }
+
+
   associate_public_ip_address = true
   key_name                    = aws_key_pair.k6_key.key_name
   user_data                   = <<-EOF
