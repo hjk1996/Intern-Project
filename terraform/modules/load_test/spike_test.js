@@ -27,14 +27,14 @@ export let options = {
   },
 };
 
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
 }
 
 export default function () {
   let res;
   if (Math.random() < readRate) {
-    var randomId = getRandomInt(5000);
+    var randomId = getRandomInt(1, 5000);
     res = http.get(`${targetURL}/home?id=${randomId}`);
   } else {
     res = http.post(
