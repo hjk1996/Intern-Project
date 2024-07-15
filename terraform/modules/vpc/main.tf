@@ -194,6 +194,18 @@ resource "aws_security_group" "cloudwatch_vpc_endpoint" {
   }
 }
 
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id = aws_vpc.main.id
+  vpc_endpoint_type = "Gateway"
+  service_name = "com.amazonaws.${var.region}.s3"
+  route_table_ids = aws_route_table.private.*.id
+
+  tags = {
+    Name = "${var.project_name}-s3-vpc-gateway-endpoint"
+  }
+}
+
+
 resource "aws_vpc_endpoint" "cloudwatch" {
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.logs"
