@@ -58,8 +58,6 @@ jobs:
           docker build -t ${{ secrets.ECR_ADDRESS }}:$IMAGE_TAG .
           docker push ${{ secrets.ECR_ADDRESS }}:$IMAGE_TAG
           echo "image=${{ secrets.ECR_ADDRESS }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
-          docker tag ${{ secrets.ECR_ADDRESS }}:$IMAGE_TAG ${{ secrets.ECR_ADDRESS }}:latest
-          docker push ${{ secrets.ECR_ADDRESS }}:latest
 
       
       # Task Definition 다운로드
