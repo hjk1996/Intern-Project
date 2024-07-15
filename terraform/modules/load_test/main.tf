@@ -207,16 +207,16 @@ resource "null_resource" "load_test_file" {
     }
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "echo export TARGET_URL=http://${var.lb_dns} >> etc/profile",
-    ]
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "echo export TARGET_URL=http://${var.lb_dns} >> etc/profile",
+  #   ]
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file(var.k6_key_path)
-      host        = aws_instance.k6.public_ip
-    }
-  }
+  #   connection {
+  #     type        = "ssh"
+  #     user        = "ubuntu"
+  #     private_key = file(var.k6_key_path)
+  #     host        = aws_instance.k6.public_ip
+  #   }
+  # }
 }

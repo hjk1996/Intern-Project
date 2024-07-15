@@ -84,10 +84,6 @@ func insertDummyData(db *gorm.DB) error {
 	dropProcedureSQL := `DROP PROCEDURE IF EXISTS InsertDummyData;`
 	db.Exec(dropProcedureSQL)
 
-
-
-
-    
 	// 스토어드 프로시저 생성 쿼리
 	createProcedureSQL := `
 	CREATE PROCEDURE InsertDummyData()

@@ -88,7 +88,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type ArticleBody struct {
-	EmployeeID uint `json:"employee_id"`
+	EmployeeID uint   `json:"employee_id"`
 	Content    string `json:"content"`
 }
 
@@ -129,8 +129,6 @@ func ArticleHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
-
-
 
 	article := models.Article{
 		EmployeeID: writeBody.EmployeeID,
