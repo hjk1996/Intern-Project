@@ -110,6 +110,11 @@ module "app_module" {
   ]
 }
 
+module "dns_module" {
+  source = "./modules/dns"
+}
+
+
 module "load_test_module" {
   source = "./modules/load_test"
   region = var.region

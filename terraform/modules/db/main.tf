@@ -89,7 +89,7 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   count                   = length(local.azs)
   identifier              = "${var.project_name}-db-${count.index}"
   cluster_identifier      = aws_rds_cluster.main.id
-  instance_class          = "db.t3.medium"
+  instance_class          = var.db_instance_class
   db_parameter_group_name = aws_db_parameter_group.main.name
   apply_immediately       = true
   engine                  = aws_rds_cluster.main.engine

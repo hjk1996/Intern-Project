@@ -200,8 +200,8 @@ resource "aws_ecs_task_definition" "app" {
     {
       name      = local.container_name
       image     = "${aws_ecr_repository.app.repository_url}:48"
-      cpu       = 10
-      memory    = 512
+      cpu       = var.ecs_task_cpu
+      memory    = var.ecs_task_memory
       essential = true
       portMappings = [
         {
