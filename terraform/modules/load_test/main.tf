@@ -106,7 +106,36 @@ resource "aws_key_pair" "k6_key" {
   public_key = tls_private_key.k6_key.public_key_openssh
 }
 
+resource "aws_iam_role" "k6" {
+  name = "${var.project_name}-load-test-role"
+  assume_role_policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow"
+          "Action" : "sts:AssumeRole"
+          "Sid" : ""
+          "Principal" : {
+            "Service" : "ec2.amazonaws.com"
+          }
+        },
+      ]
+    }
+  )
+}
 
+resource "aws_iam_role_policy_attachment" "cloudwatch" {
+  role = aws_iam_role.k6.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+
+
+resource "aws_iam_instance_profile" "k6" {
+  name = "${var.project_name}-k6-profile"
+  role = aws_iam_role.k6.name
+}
 
 
 resource "aws_instance" "k6" {
@@ -114,6 +143,7 @@ resource "aws_instance" "k6" {
   instance_type     = "t3.large"
   availability_zone = "${var.region}a"
   subnet_id         = aws_subnet.main.id
+  iam_instance_profile = aws_iam_instance_profile.k6.name
   vpc_security_group_ids = [
     aws_security_group.k6_sg.id
   ]

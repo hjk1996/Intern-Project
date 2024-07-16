@@ -18,7 +18,7 @@ provider "aws" {
     tags = {
       terraform   = true
       Environment = "prod"
-      Application = "intern-project"
+      Application = var.project_name
     }
   }
 }
@@ -123,8 +123,10 @@ module "dns_module" {
 
 module "load_test_module" {
   source = "./modules/load_test"
+  project_name = var.project_name
   region = var.region
   lb_dns = module.app_module.lb_dns
+
 }
 
 
