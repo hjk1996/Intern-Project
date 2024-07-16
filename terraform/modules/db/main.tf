@@ -44,6 +44,18 @@ resource "aws_security_group" "db" {
 
 }
 
+resource "aws_db_parameter_group" "main" {
+  name   = "${var.project_name}-aurora-mysql-pg"
+  family = "aurora-mysql5.7"
+
+
+  parameter {
+    name  = "max_execution_time"
+    value = 120000
+  }
+
+}
+
 
 
 // DB Cluster
@@ -71,6 +83,8 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   identifier         = "${var.project_name}-db-${count.index}"
   cluster_identifier = aws_rds_cluster.main.id
   instance_class     = "db.t3.medium"
+  db_parameter_group_name = aws_db_parameter_group.main.name
+  apply_immediately = true
   engine             = aws_rds_cluster.main.engine
   engine_version     = aws_rds_cluster.main.engine_version
 }

@@ -18,3 +18,8 @@ output "db_writer_endpoint" {
 output "db_name" {
   value = aws_rds_cluster.main.database_name
 }
+
+
+output "db_parameter_group_name" {
+  value = aws_rds_cluster.main.db_cluster_parameter_group_name
+}

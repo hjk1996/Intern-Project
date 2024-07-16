@@ -23,3 +23,7 @@ output "lb_dns" {
 output "k6_dns" {
   value = module.load_test_module.k6_dns
 }
+
+output "db_parameter_group_name" {
+  value = module.db_module.db_parameter_group_name
+}
