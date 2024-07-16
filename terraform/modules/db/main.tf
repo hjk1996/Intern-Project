@@ -54,6 +54,11 @@ resource "aws_db_parameter_group" "main" {
     value = 120000
   }
 
+  parameter {
+    name  = "max_connections"
+    value = var.max_connections
+  }
+
 }
 
 
@@ -75,16 +80,18 @@ resource "aws_rds_cluster" "main" {
   apply_immediately           = true
   manage_master_user_password = true
   master_username             = "master"
+
+  
 }
 
 // DB Instance
 resource "aws_rds_cluster_instance" "cluster_instances" {
-  count              = length(local.azs)
-  identifier         = "${var.project_name}-db-${count.index}"
-  cluster_identifier = aws_rds_cluster.main.id
-  instance_class     = "db.t3.medium"
+  count                   = length(local.azs)
+  identifier              = "${var.project_name}-db-${count.index}"
+  cluster_identifier      = aws_rds_cluster.main.id
+  instance_class          = "db.t3.medium"
   db_parameter_group_name = aws_db_parameter_group.main.name
-  apply_immediately = true
-  engine             = aws_rds_cluster.main.engine
-  engine_version     = aws_rds_cluster.main.engine_version
+  apply_immediately       = true
+  engine                  = aws_rds_cluster.main.engine
+  engine_version          = aws_rds_cluster.main.engine_version
 }

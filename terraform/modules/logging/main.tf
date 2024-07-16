@@ -441,7 +441,7 @@ resource "aws_iam_role_policy_attachment" "sns_trigger_lambda" {
 
 
 // ecs 서비스의 평균적인 cpu 사용량이 80를 초과하면 전송되는 알람
-resource "aws_cloudwatch_metric_alarm" "service_cpu_alarm" {
+resource "aws_cloudwatch_metric_alarm" "ecs_service_cpu" {
   alarm_name          = "${var.project_name}-ecs-service-average-CPUUtilization"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2" # 연속된 두 평가 기간 동안 조건이 충족되어야 합니다.
@@ -469,7 +469,9 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_alarm" {
 
 }
 
-resource "aws_cloudwatch_metric_alarm" "service_memory_alarm" {
+
+// ECS Service memory
+resource "aws_cloudwatch_metric_alarm" "ecs_service_memory" {
   alarm_name          = "${var.project_name}-ecs-service-average-MemoryUtilization"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2" # 연속된 두 평가 기간 동안 조건이 충족되어야 합니다.
@@ -505,6 +507,80 @@ resource "aws_cloudwatch_metric_alarm" "service_memory_alarm" {
 
 
 
+// DB 관련 알람
+// 라이터 CPU 사용률
+resource "aws_cloudwatch_metric_alarm" "rds_cpu_writer" {
+  alarm_name          = "${var.project_name}-alarm-rds-writer-CPU"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/RDS"
+  period              = "30"
+  statistic           = "Maximum"
+  threshold           = "70"
+  alarm_description   = "RDS CPU Alarm for ${var.project_name} DB writer"
+  alarm_actions       = [aws_sns_topic.app_error.arn]
+
+  dimensions = {
+    DBClusterIdentifier = var.db_cluster_identifier
+    Role                = "WRITER"
+  }
+}
+
+// 리더 CPU 사용률
+resource "aws_cloudwatch_metric_alarm" "rds_cpu_reader" {
+  alarm_name          = "${var.project_name}-alarm-rds-reader-CPU"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/RDS"
+  period              = "30"
+  statistic           = "Maximum"
+  threshold           = "70"
+  alarm_description   = "RDS CPU Alarm for ${var.project_name} DB readers"
+  alarm_actions       = [aws_sns_topic.app_error.arn]
+
+  dimensions = {
+    DBClusterIdentifier = var.db_cluster_identifier
+    Role                = "READER"
+  }
+}
 
 
+resource "aws_cloudwatch_metric_alarm" "rds_connection_writer" {
+  alarm_name          = "${var.project_name}-alarm-rds-writer-DatabaseConnections"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "DatabaseConnections"
+  namespace           = "AWS/RDS"
+  period              = 60
+  statistic           = "Maximum"
+  threshold           = var.max_connections
+  alarm_description   = "RDS Maximum connection Alarm for ${var.project_name} DB writers"
+  alarm_actions       = [aws_sns_topic.app_error.arn]
+
+  dimensions = {
+    DBClusterIdentifier = var.db_cluster_identifier
+    Role                = "WRITER"
+  }
+}
+
+
+resource "aws_cloudwatch_metric_alarm" "rds_connection_reader" {
+  alarm_name          = "${var.project_name}-alarm-rds-reader-DatabaseConnections"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "DatabaseConnections"
+  namespace           = "AWS/RDS"
+  period              = 60
+  statistic           = "Maximum"
+  threshold           = var.max_connections
+  alarm_description   = "RDS Maximum connection Alarm for ${var.project_name} DB reader"
+  alarm_actions       = [aws_sns_topic.app_error.arn]
+
+  dimensions = {
+    DBClusterIdentifier = var.db_cluster_identifier
+    Role                = "READER"
+  }
+}
 

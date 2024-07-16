@@ -80,3 +80,6 @@ variable "ecs_task_memory" {
 
 
 
+variable "max_connections" {
+  type = number
+}

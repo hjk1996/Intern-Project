@@ -17,3 +17,11 @@ variable "ecs_cluster_name" {
 variable "ecs_service_name" {
   type = string
 }
+
+variable "db_cluster_identifier" {
+  type = string
+}
+
+variable "max_connections" {
+  type = number
+}

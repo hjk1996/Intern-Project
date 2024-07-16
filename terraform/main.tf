@@ -26,7 +26,7 @@ provider "aws" {
 
 module "vpc_module" {
   source       = "./modules/vpc"
-  region = var.region
+  region       = var.region
   cidr_block   = var.cidr_block
   project_name = var.project_name
 }
@@ -34,12 +34,14 @@ module "vpc_module" {
 
 
 module "logging_module" {
-  source            = "./modules/logging"
-  project_name      = var.project_name
-  slack_webhook_url = var.slack_webhook_url
-  slack_channel     = var.slack_channel
-  ecs_cluster_name  = module.app_module.ecs_cluster_name
-  ecs_service_name  = module.app_module.ecs_service_name
+  source                = "./modules/logging"
+  project_name          = var.project_name
+  slack_webhook_url     = var.slack_webhook_url
+  slack_channel         = var.slack_channel
+  ecs_cluster_name      = module.app_module.ecs_cluster_name
+  ecs_service_name      = module.app_module.ecs_service_name
+  db_cluster_identifier = module.db_module.db_cluster_identifier
+  max_connections       = var.max_connections
 }
 
 module "db_module" {
@@ -51,6 +53,7 @@ module "db_module" {
   db_private_subnet_ids = module.vpc_module.db_private_subnet_ids
   cidr_block            = var.cidr_block
   db_name               = var.db_name
+  max_connections       = var.max_connections
   depends_on = [
     module.vpc_module
   ]
