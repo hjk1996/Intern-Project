@@ -132,6 +132,8 @@ resource "aws_instance" "k6" {
               echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
               sudo apt-get update
               sudo apt-get install k6
+              wget https://s3.amazonaws.com/amazoncloudwatch-agent/debian/amd64/latest/amazon-cloudwatch-agent.deb
+              sudo dpkg -i amazon-cloudwatch-agent.deb
               echo "good"
               EOF
 

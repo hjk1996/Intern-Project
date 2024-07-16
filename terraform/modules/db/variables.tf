@@ -33,8 +33,3 @@ variable "cidr_block" {
 variable "max_connections" {
   type = number
 }
-
-
-
-
-

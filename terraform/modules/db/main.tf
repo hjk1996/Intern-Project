@@ -81,7 +81,7 @@ resource "aws_rds_cluster" "main" {
   manage_master_user_password = true
   master_username             = "master"
 
-  
+
 }
 
 // DB Instance

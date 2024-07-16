@@ -82,6 +82,7 @@ module "app_module" {
   log_group_name    = module.logging_module.log_gorup_name
   log_group_arn     = module.logging_module.log_group_arn
   vpc_id            = module.vpc_module.vpc_id
+  certificate_arn   = module.dns_module.certificate_arn
   cidr_block        = var.cidr_block
   public_subnet_ids = module.vpc_module.public_subnet_ids
   app_subnet_ids    = module.vpc_module.app_subnet_ids
@@ -111,8 +112,13 @@ module "app_module" {
 }
 
 module "dns_module" {
-  source = "./modules/dns"
+  source    = "./modules/dns"
+  zone_name = var.zone_name
+  lb_dns    = module.app_module.lb_dns
 }
+
+
+
 
 
 module "load_test_module" {

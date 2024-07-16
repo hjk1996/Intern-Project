@@ -91,6 +91,9 @@ variable "ecs_task_memory" {
   type = number
 }
 
+variable "certificate_arn" {
+  type = string
+}
 
 
 

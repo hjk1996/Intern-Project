@@ -1,14 +1,10 @@
 
 
-data "aws_region" "current" {
-
-}
-
 locals {
   azs = [
-    "${data.aws_region.current.name}a",
-    "${data.aws_region.current.name}c",
-    "${data.aws_region.current.name}d",
+    "${var.region}a",
+    "${var.region}c",
+    "${var.region}d",
   ]
 }
 
@@ -209,7 +205,7 @@ resource "aws_vpc_endpoint" "s3" {
 
 resource "aws_vpc_endpoint" "cloudwatch" {
   vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.${data.aws_region.current.name}.logs"
+  service_name      = "com.amazonaws.${var.region}.logs"
   vpc_endpoint_type = "Interface"
 
 
@@ -263,7 +259,7 @@ resource "aws_security_group" "secret_manager_vpc_endpoint" {
 
 resource "aws_vpc_endpoint" "secret_manager" {
   vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.${data.aws_region.current.name}.secretsmanager"
+  service_name      = "com.amazonaws.${var.region}.secretsmanager"
   vpc_endpoint_type = "Interface"
 
 
@@ -317,7 +313,7 @@ resource "aws_security_group" "ecr_vpc_endpoint" {
 
 resource "aws_vpc_endpoint" "ecr" {
   vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.${data.aws_region.current.name}.ecr.dkr"
+  service_name      = "com.amazonaws.${var.region}.ecr.dkr"
   vpc_endpoint_type = "Interface"
 
 

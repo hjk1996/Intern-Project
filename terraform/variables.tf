@@ -25,6 +25,12 @@ variable "db_name" {
 }
 
 
+variable "max_connections" {
+  type = number
+}
+
+
+
 variable "ssh_key_path" {
   type = string
 }
@@ -77,9 +83,10 @@ variable "ecs_task_memory" {
 
 
 
+variable "zone_name" {
+  type = string
+}
 
-
-
-variable "max_connections" {
-  type = number
+variable "lb_cname" {
+  type = string
 }
