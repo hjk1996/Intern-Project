@@ -610,11 +610,17 @@ resource "aws_cloudwatch_dashboard" "main" {
                 "metricName" : "FreeableMemory",
                 "resourceType" : "AWS::RDS::DBInstance",
                 "stat" : "Average"
+              },
+              {
+                "metricName" : "DatabaseConnections",
+                "resourceType" : "AWS::RDS::DBInstance",
+                "stat" : "Sum"
               }
             ],
             "labels" : [
               {
-                "key" : "${var.project_name}"
+                "key" : "Application",
+                "value" : "${var.project_name}"
               }
             ],
             "widgetOptions" : {
@@ -632,6 +638,7 @@ resource "aws_cloudwatch_dashboard" "main" {
             "title" : "RDS metrics"
           }
         },
+        
       ]
     }
   )
