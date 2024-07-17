@@ -29,6 +29,9 @@ variable "max_connections" {
   type = number
 }
 
+variable "wait_timeout" {
+  type = number
+}
 
 
 variable "ssh_key_path" {

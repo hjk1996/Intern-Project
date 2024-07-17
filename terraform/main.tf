@@ -54,6 +54,9 @@ module "db_module" {
   cidr_block            = var.cidr_block
   db_name               = var.db_name
   max_connections       = var.max_connections
+  wait_timeout = var.wait_timeout
+
+
   depends_on = [
     module.vpc_module
   ]
@@ -117,6 +120,11 @@ module "dns_module" {
   lb_dns    = module.app_module.lb_dns
 }
 
+module "waf_module" {
+  source = "./modules/waf"
+  project_name = var.project_name
+}
+
 
 
 
@@ -128,5 +136,8 @@ module "load_test_module" {
   lb_dns = module.app_module.lb_dns
   zone_name = var.zone_name
 }
+
+
+
 
 

@@ -59,6 +59,11 @@ resource "aws_db_parameter_group" "main" {
     value = var.max_connections
   }
 
+  parameter {
+    name = "wait_timeout"
+    value = var.wait_timeout
+  }
+
 }
 
 
