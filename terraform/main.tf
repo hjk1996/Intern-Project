@@ -126,7 +126,7 @@ module "load_test_module" {
   project_name = var.project_name
   region = var.region
   lb_dns = module.app_module.lb_dns
-
+  zone_name = var.zone_name
 }
 
 

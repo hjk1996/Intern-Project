@@ -10,8 +10,8 @@ const writeRate = 0.1; // 쓰기 작업 비율
 export let options = {
   scenarios: {
     ramping_requests: {
-      executor: "ramping-arrival-rate",
-      startRate: 0, // 시작 시 초당 요청 수
+      executor: "constant-arrival-rate",
+      startRate: 50, // 시작 시 초당 요청 수
       timeUnit: "1s", // rate 단위
       preAllocatedVUs: 50, // 필요한 VUs 수
       maxVUs: 500, // 최대 VUs 수

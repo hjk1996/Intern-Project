@@ -16,3 +16,8 @@ variable "k6_key_path" {
 variable "lb_dns" {
   type = string
 }
+
+
+variable "zone_name" {
+  type = string
+}

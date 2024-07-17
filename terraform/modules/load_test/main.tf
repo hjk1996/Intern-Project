@@ -70,6 +70,15 @@ resource "aws_security_group" "k6_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port = 5665
+    to_port = 5665
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -162,9 +171,9 @@ resource "aws_instance" "k6" {
               echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
               sudo apt-get update
               sudo apt-get install k6
+              sudo echo "export TARGET_URL=https://madang.${var.zone_name}" >> /home/ubuntu/.bashrc
               wget https://s3.amazonaws.com/amazoncloudwatch-agent/debian/amd64/latest/amazon-cloudwatch-agent.deb
               sudo dpkg -i amazon-cloudwatch-agent.deb
-              echo "good"
               EOF
 
 
