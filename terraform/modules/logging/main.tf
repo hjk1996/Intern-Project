@@ -584,3 +584,57 @@ resource "aws_cloudwatch_metric_alarm" "rds_connection_reader" {
   }
 }
 
+
+
+// cloudwatch dashboard
+
+resource "aws_cloudwatch_dashboard" "main" {
+  dashboard_name = "${var.project_name}-dashboard"
+  dashboard_body = jsonencode(
+    {
+      "widgets" : [
+        {
+          "height" : 15,
+          "width" : 24,
+          "y" : 0,
+          "x" : 0,
+          "type" : "explorer",
+          "properties" : {
+            "metrics" : [
+              {
+                "metricName" : "CPUUtilization",
+                "resourceType" : "AWS::RDS::DBInstance",
+                "stat" : "Average"
+              },
+              {
+                "metricName" : "FreeableMemory",
+                "resourceType" : "AWS::RDS::DBInstance",
+                "stat" : "Average"
+              }
+            ],
+            "labels" : [
+              {
+                "key" : "${var.project_name}"
+              }
+            ],
+            "widgetOptions" : {
+              "legend" : {
+                "position" : "bottom"
+              },
+              "view" : "timeSeries",
+              "stacked" : false,
+              "rowsPerPage" : 50,
+              "widgetsPerRow" : 2
+            },
+            "period" : 300,
+            "splitBy" : "",
+            "region" : "${var.region}",
+            "title" : "RDS metrics"
+          }
+        },
+      ]
+    }
+  )
+}
+
+

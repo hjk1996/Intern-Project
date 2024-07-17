@@ -10,7 +10,6 @@ locals {
 
 
 
-
 // DB 서브넷 그룹
 resource "aws_db_subnet_group" "main" {
   name       = "${var.project_name}-subnet-group"
@@ -60,7 +59,7 @@ resource "aws_db_parameter_group" "main" {
   }
 
   parameter {
-    name = "wait_timeout"
+    name  = "wait_timeout"
     value = var.wait_timeout
   }
 
@@ -85,8 +84,6 @@ resource "aws_rds_cluster" "main" {
   apply_immediately           = true
   manage_master_user_password = true
   master_username             = "master"
-
-
 }
 
 // DB Instance

@@ -71,9 +71,9 @@ resource "aws_security_group" "k6_sg" {
   }
 
   ingress {
-    from_port = 5665
-    to_port = 5665
-    protocol = "tcp"
+    from_port   = 5665
+    to_port     = 5665
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -135,7 +135,7 @@ resource "aws_iam_role" "k6" {
 }
 
 resource "aws_iam_role_policy_attachment" "cloudwatch" {
-  role = aws_iam_role.k6.name
+  role       = aws_iam_role.k6.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
@@ -148,10 +148,10 @@ resource "aws_iam_instance_profile" "k6" {
 
 
 resource "aws_instance" "k6" {
-  ami               = "ami-062cf18d655c0b1e8" # Ubuntu
-  instance_type     = "t3.large"
-  availability_zone = "${var.region}a"
-  subnet_id         = aws_subnet.main.id
+  ami                  = "ami-062cf18d655c0b1e8" # Ubuntu
+  instance_type        = "t3.large"
+  availability_zone    = "${var.region}a"
+  subnet_id            = aws_subnet.main.id
   iam_instance_profile = aws_iam_instance_profile.k6.name
   vpc_security_group_ids = [
     aws_security_group.k6_sg.id

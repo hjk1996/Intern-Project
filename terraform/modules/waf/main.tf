@@ -35,7 +35,7 @@ resource "aws_wafv2_web_acl" "main" {
           name = "NoUserAgent_HEADER"
         }
 
-        
+
       }
     }
     visibility_config {

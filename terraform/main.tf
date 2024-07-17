@@ -35,6 +35,7 @@ module "vpc_module" {
 
 module "logging_module" {
   source                = "./modules/logging"
+  region                = var.region
   project_name          = var.project_name
   slack_webhook_url     = var.slack_webhook_url
   slack_channel         = var.slack_channel
@@ -54,7 +55,7 @@ module "db_module" {
   cidr_block            = var.cidr_block
   db_name               = var.db_name
   max_connections       = var.max_connections
-  wait_timeout = var.wait_timeout
+  wait_timeout          = var.wait_timeout
 
 
   depends_on = [
@@ -121,7 +122,7 @@ module "dns_module" {
 }
 
 module "waf_module" {
-  source = "./modules/waf"
+  source       = "./modules/waf"
   project_name = var.project_name
 }
 
@@ -130,11 +131,11 @@ module "waf_module" {
 
 
 module "load_test_module" {
-  source = "./modules/load_test"
+  source       = "./modules/load_test"
   project_name = var.project_name
-  region = var.region
-  lb_dns = module.app_module.lb_dns
-  zone_name = var.zone_name
+  region       = var.region
+  lb_dns       = module.app_module.lb_dns
+  zone_name    = var.zone_name
 }
 
 

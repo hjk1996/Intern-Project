@@ -241,7 +241,7 @@ resource "aws_ecs_task_definition" "app" {
         }
       }
 
-      
+
     }
   ])
 }
@@ -278,7 +278,7 @@ resource "aws_ecs_service" "app" {
   cluster         = aws_ecs_cluster.main.arn
   task_definition = aws_ecs_task_definition.app.arn
   launch_type     = "FARGATE"
-  desired_count   = 3
+  desired_count   = var.min_task_count
 
 
   network_configuration {
@@ -410,6 +410,7 @@ resource "aws_appautoscaling_policy" "cpu_scaling_policy" {
   resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.app.name}"
   scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
   service_namespace  = aws_appautoscaling_target.ecs.service_namespace
+
 
   target_tracking_scaling_policy_configuration {
     target_value = var.ecs_cpu_utilization_target
