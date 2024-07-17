@@ -39,6 +39,7 @@ export let options = {
   },
   thresholds: {
     http_req_duration: ["p(95)<100"], // 95%의 요청이 500ms 이내에 완료되어야 함
+    check: ["rate>0.999999"],
   },
 };
 

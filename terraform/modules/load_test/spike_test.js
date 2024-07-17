@@ -24,6 +24,7 @@ export let options = {
   },
   thresholds: {
     http_req_duration: ["p(95)<100"], //
+    check: ["rate>0.999999"]
   },
 };
 
