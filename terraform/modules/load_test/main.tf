@@ -172,8 +172,6 @@ resource "aws_instance" "k6" {
               sudo apt-get update
               sudo apt-get install k6
               sudo echo "export TARGET_URL=https://madang.${var.zone_name}" >> /home/ubuntu/.bashrc
-              wget https://s3.amazonaws.com/amazoncloudwatch-agent/debian/amd64/latest/amazon-cloudwatch-agent.deb
-              sudo dpkg -i amazon-cloudwatch-agent.deb
               EOF
 
 

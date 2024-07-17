@@ -9,22 +9,27 @@ const writeRate = 0.1; // 쓰기 작업 비율
 
 export let options = {
   scenarios: {
-    ramping_requests: {
+    normal_traffic: {
       executor: "constant-arrival-rate",
-      startRate: 50, // 시작 시 초당 요청 수
-      timeUnit: "1s", // rate 단위
-      preAllocatedVUs: 50, // 필요한 VUs 수
-      maxVUs: 500, // 최대 VUs 수
-      stages: [
-        { target: 50, duration: "2m" },
-        { target: 420, duration: "10m" },
-        { target: 1670, duration: "10m" },
-      ],
+      duration: "10m",
+      rate: 420,
+      timeUnit: "1s",
+      preAllocatedVUs: 50,
+      maxVUs: 500,
+    },
+    peak_time_traffic: {
+      executor: "constant-arrival-rate",
+      duration: "10m",
+      rate: 1670,
+      timeUnit: "1s",
+      startTime: "10m",
+      preAllocatedVUs: 100,
+      maxVUs: 500,
     },
   },
   thresholds: {
     http_req_duration: ["p(95)<100"], //
-    check: ["rate>0.999999"]
+    checks: ["rate>0.999999"],
   },
 };
 
