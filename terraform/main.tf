@@ -38,7 +38,7 @@ module "vpc_module" {
 }
 
 
-
+// TODO: 로깅 모듈에서 alarm으로 받고자 하는 것들 사용자가 설정할 수 있도록 리팩토링
 module "logging_module" {
   source       = "./modules/logging"
   region       = var.region
@@ -51,6 +51,10 @@ module "logging_module" {
   ecs_service_name = module.app_module.ecs_service_name
   ecs_task_cpu     = var.ecs_task_cpu
   ecs_task_memory  = var.ecs_task_memory
+
+  ecs_metric_names = {
+
+  }
 
 
   db_cluster_identifier = module.db_module.db_cluster_identifier
@@ -77,6 +81,7 @@ module "db_module" {
   ]
 }
 
+// TODO: bastion toggle 가능하게 모듈 수정
 module "bastion_module" {
   source       = "./modules/bastion"
   region       = var.region
@@ -95,7 +100,7 @@ module "bastion_module" {
 
 }
 
-
+// TODO: app 모듈 리팩토링
 module "app_module" {
   source       = "./modules/app"
   region       = var.region
@@ -135,6 +140,8 @@ module "app_module" {
   ]
 }
 
+
+// TODO:  DNS 토글 가능하게 수정
 module "dns_module" {
   source = "./modules/dns"
 
