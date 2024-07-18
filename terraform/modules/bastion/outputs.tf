@@ -1,4 +1,3 @@
 output "bastion_dns_name" {
-  value = aws_instance.bastion.public_dns
-
+  value = var.enable_bastion ? aws_instance.bastion[0].public_dns : null
 }

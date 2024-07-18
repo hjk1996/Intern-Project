@@ -67,6 +67,7 @@ module "db_module" {
   project_name = var.project_name
 
   cidr_block = var.cidr_block
+  number_of_azs = var.number_of_azs
   vpc_id     = module.vpc_module.vpc_id
 
   db_name               = var.db_name
@@ -86,6 +87,8 @@ module "bastion_module" {
   source       = "./modules/bastion"
   region       = var.region
   project_name = var.project_name
+
+  enable_bastion = var.enable_bastion
 
   vpc_id    = module.vpc_module.vpc_id
   subnet_id = module.vpc_module.public_subnet_ids[0]

@@ -33,7 +33,7 @@ variable "interface_endpoint_service_names" {
 
 variable "number_of_azs" {
   type        = number
-  description = "가용 영역의 수"
+  description = "가용 영역의 수. 가용 영역의 수에 따라 NGW와 데이터베이스 인스턴스의 수가 결정됩니다."
   validation {
 
     condition     = var.number_of_azs > 0 && var.number_of_azs <= 3
@@ -46,6 +46,10 @@ variable "number_of_azs" {
 
 // ---------------------------
 // bastion 관련 변수
+variable "enable_bastion" {
+  type = bool
+  description = "public subent에 bastion host를 생성할 지 여부를 결정합니다."
+}
 variable "bastion_key_path" {
   type        = string
   description = "bastion 인스턴스에 접속하기 위한 private key가 저장되는 로컬 경로"
@@ -148,31 +152,31 @@ variable "ecs_task_memory" {
   description = "ECS Task에 부여될 Memory 용량 (MB)"
 }
 
-variable "ecs_alarms" {
-  type = list(object({
-    metric_name = string
-    period = number
-    evaluation_periods = number
-    threshold = number
-    statistic = string
-    comparison_operator = string 
-    alarm_action = bool
-    ok_action = bool
-  }))
-}
+# variable "ecs_alarms" {
+#   type = list(object({
+#     metric_name = string
+#     period = number
+#     evaluation_periods = number
+#     threshold = number
+#     statistic = string
+#     comparison_operator = string 
+#     alarm_action = bool
+#     ok_action = bool
+#   }))
+# }
 
-variable "rds_alarms" {
-  type = list(object({
-    metric_name = string
-    period = number
-    evaluation_periods = number
-    threshold = number
-    statistic = string
-    comparison_operator = string 
-    alarm_action = bool
-    ok_action = bool
-  }))
-}
+# variable "rds_alarms" {
+#   type = list(object({
+#     metric_name = string
+#     period = number
+#     evaluation_periods = number
+#     threshold = number
+#     statistic = string
+#     comparison_operator = string 
+#     alarm_action = bool
+#     ok_action = bool
+#   }))
+# }
 
 
 

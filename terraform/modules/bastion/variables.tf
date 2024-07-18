@@ -1,3 +1,7 @@
+variable "enable_bastion" {
+  type = bool
+}
+
 variable "region" {
   type = string
 }

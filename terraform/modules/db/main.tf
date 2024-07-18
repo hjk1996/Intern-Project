@@ -1,11 +1,11 @@
 
 
 locals {
-  azs = [
-    "${var.region}a",
-    "${var.region}c",
-    "${var.region}d",
-  ]
+
+  az_alphabets = ["a", "c", "d"]
+
+  azs = [for n in range(var.number_of_azs) : "${var.region}${local.az_alphabets[n]}"]
+
 }
 
 
@@ -88,7 +88,7 @@ resource "aws_rds_cluster" "main" {
 
 // DB Instance
 resource "aws_rds_cluster_instance" "cluster_instances" {
-  count                   = length(local.azs)
+  count                   = var.number_of_azs
   identifier              = "${var.project_name}-db-${count.index}"
   cluster_identifier      = aws_rds_cluster.main.id
   instance_class          = var.db_instance_class

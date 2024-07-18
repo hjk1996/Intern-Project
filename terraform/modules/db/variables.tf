@@ -15,6 +15,12 @@ variable "vpc_id" {
   type = string
 }
 
+variable "number_of_azs" {
+  type = number
+  
+}
+
+
 
 variable "db_private_subnet_ids" {
   type = list(string)

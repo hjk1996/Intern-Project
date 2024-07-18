@@ -1,5 +1,6 @@
 // bastion 보안 그룹
 resource "aws_security_group" "bastion" {
+  count = var.enable_bastion ? 1 : 0
   name   = "${var.project_name}-bastion-sg"
   vpc_id = var.vpc_id
 
@@ -27,13 +28,15 @@ resource "aws_security_group" "bastion" {
 
 # ssh key
 resource "tls_private_key" "bastion_key" {
+  count = var.enable_bastion ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 // 생성한 key local에 저장
 resource "local_file" "bastion_key" {
-  content  = tls_private_key.bastion_key.private_key_pem
+  count = var.enable_bastion ? 1 : 0
+  content  = tls_private_key.bastion_key[0].private_key_pem
   filename = var.bastion_key_path
 
   provisioner "local-exec" {
@@ -44,19 +47,21 @@ resource "local_file" "bastion_key" {
 
 
 resource "aws_key_pair" "bastion_key" {
+  count = var.enable_bastion ? 1 : 0
   key_name   = "${var.project_name}-bastion-key-pair"
-  public_key = tls_private_key.bastion_key.public_key_openssh
+  public_key = tls_private_key.bastion_key[0].public_key_openssh
 }
 
 
 
 resource "aws_instance" "bastion" {
+  count = var.enable_bastion ? 1 : 0
   availability_zone = "${var.region}a"
   instance_type     = "t3.micro"
   vpc_security_group_ids = [
-    aws_security_group.bastion.id
+    aws_security_group.bastion[0].id
   ]
-  key_name  = aws_key_pair.bastion_key.key_name
+  key_name  = aws_key_pair.bastion_key[0].key_name
   subnet_id = var.subnet_id
   ami       = "ami-062cf18d655c0b1e8"
   // public ip 부여
