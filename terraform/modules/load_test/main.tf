@@ -1,8 +1,7 @@
 
 resource "aws_vpc" "main" {
+  count      = var.enable_load_test ? 1 : 0
   cidr_block = "172.168.0.0/16"
-
-
   // Amazon 제공 DNS 서버에 대한 쿼리 여부
   enable_dns_support = true
   // public ip가 있는 host에 대해 public dns hostname을 허용할 것인지 여부
@@ -14,7 +13,8 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_internet_gateway" "main" {
-  vpc_id = aws_vpc.main.id
+  count  = var.enable_load_test ? 1 : 0
+  vpc_id = aws_vpc.main[0].id
 
   tags = {
     Name = "$k6-igw"
@@ -22,11 +22,13 @@ resource "aws_internet_gateway" "main" {
 
 }
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
+  count = var.enable_load_test ? 1 : 0
+
+  vpc_id = aws_vpc.main[0].id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id
+    gateway_id = aws_internet_gateway.main[0].id
   }
 
 
@@ -36,15 +38,19 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  route_table_id = aws_route_table.public.id
-  subnet_id      = aws_subnet.main.id
+  count = var.enable_load_test ? 1 : 0
+
+  route_table_id = aws_route_table.public[0].id
+  subnet_id      = aws_subnet.main[0].id
 }
 
 
 
 
 resource "aws_subnet" "main" {
-  vpc_id            = aws_vpc.main.id
+  count = var.enable_load_test ? 1 : 0
+
+  vpc_id            = aws_vpc.main[0].id
   cidr_block        = "172.168.1.0/24"
   availability_zone = "${var.region}a"
 
@@ -54,7 +60,9 @@ resource "aws_subnet" "main" {
 }
 
 resource "aws_security_group" "k6_sg" {
-  vpc_id = aws_vpc.main.id
+  count = var.enable_load_test ? 1 : 0
+
+  vpc_id = aws_vpc.main[0].id
 
   ingress {
     from_port   = 22
@@ -94,13 +102,16 @@ resource "aws_security_group" "k6_sg" {
 
 # ssh key
 resource "tls_private_key" "k6_key" {
+  count     = var.enable_load_test ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 // 생성한 key local에 저장
 resource "local_file" "k6_key" {
-  content  = tls_private_key.k6_key.private_key_pem
+  count = var.enable_load_test ? 1 : 0
+
+  content  = tls_private_key.k6_key[0].private_key_pem
   filename = var.k6_key_path
 
   provisioner "local-exec" {
@@ -111,12 +122,14 @@ resource "local_file" "k6_key" {
 
 
 resource "aws_key_pair" "k6_key" {
+  count      = var.enable_load_test ? 1 : 0
   key_name   = "k6-key-pair"
-  public_key = tls_private_key.k6_key.public_key_openssh
+  public_key = tls_private_key.k6_key[0].public_key_openssh
 }
 
 resource "aws_iam_role" "k6" {
-  name = "${var.project_name}-load-test-role"
+  count = var.enable_load_test ? 1 : 0
+  name  = "${var.project_name}-load-test-role"
   assume_role_policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -135,26 +148,29 @@ resource "aws_iam_role" "k6" {
 }
 
 resource "aws_iam_role_policy_attachment" "cloudwatch" {
-  role       = aws_iam_role.k6.name
+  count      = var.enable_load_test ? 1 : 0
+  role       = aws_iam_role.k6[0].name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
 
 
 resource "aws_iam_instance_profile" "k6" {
-  name = "${var.project_name}-k6-profile"
-  role = aws_iam_role.k6.name
+  count = var.enable_load_test ? 1 : 0
+  name  = "${var.project_name}-k6-profile"
+  role  = aws_iam_role.k6[0].name
 }
 
 
 resource "aws_instance" "k6" {
+  count                = var.enable_load_test ? 1 : 0
   ami                  = "ami-062cf18d655c0b1e8" # Ubuntu
   instance_type        = "t3.large"
   availability_zone    = "${var.region}a"
-  subnet_id            = aws_subnet.main.id
-  iam_instance_profile = aws_iam_instance_profile.k6.name
+  subnet_id            = aws_subnet.main[0].id
+  iam_instance_profile = aws_iam_instance_profile.k6[0].name
   vpc_security_group_ids = [
-    aws_security_group.k6_sg.id
+    aws_security_group.k6_sg[0].id
   ]
 
   root_block_device {
@@ -163,7 +179,7 @@ resource "aws_instance" "k6" {
 
 
   associate_public_ip_address = true
-  key_name                    = aws_key_pair.k6_key.key_name
+  key_name                    = aws_key_pair.k6_key[0].key_name
   user_data                   = <<-EOF
               #!/bin/bash
               sudo gpg -k
@@ -222,6 +238,7 @@ resource "aws_instance" "k6" {
 }
 
 resource "null_resource" "load_test_file" {
+  count = var.enable_load_test ? 1 : 0
   triggers = {
     file_md5_1 = md5(file("${path.module}/stress_test.js"))
     file_md5_2 = md5(file("${path.module}/spike_test.js"))
@@ -235,7 +252,7 @@ resource "null_resource" "load_test_file" {
       type        = "ssh"
       user        = "ubuntu"
       private_key = file(var.k6_key_path)
-      host        = aws_instance.k6.public_ip
+      host        = aws_instance.k6[0].public_ip
     }
   }
 
@@ -248,20 +265,9 @@ resource "null_resource" "load_test_file" {
       type        = "ssh"
       user        = "ubuntu"
       private_key = file(var.k6_key_path)
-      host        = aws_instance.k6.public_ip
+      host        = aws_instance.k6[0].public_ip
     }
   }
 
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "echo export TARGET_URL=http://${var.lb_dns} >> etc/profile",
-  #   ]
 
-  #   connection {
-  #     type        = "ssh"
-  #     user        = "ubuntu"
-  #     private_key = file(var.k6_key_path)
-  #     host        = aws_instance.k6.public_ip
-  #   }
-  # }
 }

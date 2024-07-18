@@ -38,3 +38,9 @@ variable "db_cluster_identifier" {
 variable "max_connections" {
   type = number
 }
+
+
+variable "ecs_metric_names" {
+  
+}
+

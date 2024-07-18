@@ -8,16 +8,16 @@ resource "aws_wafv2_web_acl" "main" {
 
   }
 
-  
+
   rule {
     name     = "AWSManagedRulesCommonRuleSet"
     priority = 10
 
-  
+
 
     override_action {
       count {
-        
+
       }
 
     }

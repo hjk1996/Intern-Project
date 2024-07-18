@@ -1,17 +1,16 @@
 
 
 locals {
-  azs = [
-    "${var.region}a",
-    "${var.region}c",
-    "${var.region}d",
-  ]
+
+  az_alphabets = ["a", "c", "d"]
+
+  azs = [for n in range(var.number_of_azs) : "${var.region}${local.az_alphabets[n]}"]
+
 }
 
 
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
-
   tags = {
     Name = "${var.project_name}-vpc"
   }
@@ -26,7 +25,7 @@ resource "aws_vpc" "main" {
 
 //subnets
 resource "aws_subnet" "public" {
-  count             = length(local.azs)
+  count             = var.number_of_azs
   vpc_id            = aws_vpc.main.id
   availability_zone = local.azs[count.index]
   cidr_block        = cidrsubnet(var.cidr_block, 8, count.index)
@@ -42,7 +41,7 @@ resource "aws_subnet" "public" {
 
 
 resource "aws_subnet" "private_app" {
-  count             = length(local.azs)
+  count             = var.number_of_azs
   vpc_id            = aws_vpc.main.id
   availability_zone = local.azs[count.index]
   cidr_block        = cidrsubnet(var.cidr_block, 8, 100 + count.index)
@@ -53,6 +52,7 @@ resource "aws_subnet" "private_app" {
 
 
 resource "aws_subnet" "interface_endpoint" {
+  count             = var.enable_vpc_interface_endpoint ? 1 : 0
   vpc_id            = aws_vpc.main.id
   availability_zone = local.azs[0]
   cidr_block        = cidrsubnet(var.cidr_block, 8, 100 + length(local.azs))
@@ -65,7 +65,7 @@ resource "aws_subnet" "interface_endpoint" {
 
 
 resource "aws_subnet" "private_db" {
-  count             = length(local.azs)
+  count             = var.number_of_azs
   vpc_id            = aws_vpc.main.id
   availability_zone = local.azs[count.index]
   cidr_block        = cidrsubnet(var.cidr_block, 8, 200 + count.index)
@@ -84,10 +84,9 @@ resource "aws_internet_gateway" "main" {
 
 }
 
-// eip
-// nat gateway에 public ip 부여를 위해서 필요함
+// NAT Gateway EIP
 resource "aws_eip" "nat" {
-  count = length(aws_subnet.public.*.id)
+  count = var.number_of_azs
 
   lifecycle {
     create_before_destroy = true
@@ -98,7 +97,7 @@ resource "aws_eip" "nat" {
 
 // nat gateways
 resource "aws_nat_gateway" "main" {
-  count         = length(aws_subnet.public.*.id)
+  count         = var.number_of_azs
   allocation_id = element(aws_eip.nat.*.id, count.index)
   subnet_id     = element(aws_subnet.public.*.id, count.index)
 
@@ -126,13 +125,13 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  count          = length(aws_subnet.public.*.id)
+  count          = var.number_of_azs
   route_table_id = aws_route_table.public.id
   subnet_id      = aws_subnet.public[count.index].id
 }
 
 resource "aws_route_table" "private" {
-  count  = length(aws_subnet.private_app.*.id)
+  count  = var.number_of_azs
   vpc_id = aws_vpc.main.id
 
 
@@ -162,9 +161,15 @@ resource "aws_route_table_association" "db" {
 }
 
 
-// cloudwatch vpc endpoint
-resource "aws_security_group" "cloudwatch_vpc_endpoint" {
-  name   = "${var.project_name}-cloudwatch-logs-vpc-endpoint-sg"
+// 엔드포인트 관련 -----------------
+
+
+
+// VPC Interface Endpoint
+
+resource "aws_security_group" "interface_endpoint" {
+  count  = var.enable_vpc_interface_endpoint ? 1 : 0
+  name   = "${var.project_name}-interface-endpoint-sg"
   vpc_id = aws_vpc.main.id
   ingress {
     from_port = 443
@@ -185,154 +190,50 @@ resource "aws_security_group" "cloudwatch_vpc_endpoint" {
   }
 
   tags = {
-    Name = "cloudwatch-logs-vpc-endpoint-sg"
+    Name = "${var.project_name}-interface-endpoint-sg"
   }
 }
+
+
+resource "aws_vpc_endpoint" "main" {
+  for_each          = var.enable_vpc_interface_endpoint ? toset(var.interface_endpoint_service_names) : toset([])
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${var.region}.${each.key}"
+  vpc_endpoint_type = "Interface"
+
+  security_group_ids = [
+    aws_security_group.interface_endpoint[0].id
+  ]
+
+  private_dns_enabled = true
+  auto_accept         = true
+
+  tags = {
+    Name = "${var.project_name}-${each.key}-interface-endpoint"
+  }
+}
+
+resource "aws_vpc_endpoint_subnet_association" "cloudwatch" {
+  for_each        = var.enable_vpc_interface_endpoint ? toset(var.interface_endpoint_service_names) : toset([])
+  vpc_endpoint_id = aws_vpc_endpoint.main[each.key].id
+  subnet_id       = aws_subnet.interface_endpoint[0].id
+}
+
+
+
+
+
+
+
 
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
   vpc_endpoint_type = "Gateway"
   service_name      = "com.amazonaws.${var.region}.s3"
-  // route table id를 지정하는건 gateway endpoint 타입에서만 가능함
-  route_table_ids = aws_route_table.private.*.id
+  route_table_ids   = aws_route_table.private.*.id
 
   tags = {
     Name = "${var.project_name}-s3-vpc-gateway-endpoint"
   }
-}
-
-
-resource "aws_vpc_endpoint" "cloudwatch" {
-  vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.${var.region}.logs"
-  vpc_endpoint_type = "Interface"
-
-
-  security_group_ids = [
-    aws_security_group.cloudwatch_vpc_endpoint.id
-  ]
-
-
-
-  private_dns_enabled = true
-  auto_accept         = true
-
-  tags = {
-    Name = "${var.project_name}-cloudwatch-log-vpc-endpoint"
-  }
-
-}
-
-resource "aws_vpc_endpoint_subnet_association" "cloudwatch" {
-  vpc_endpoint_id = aws_vpc_endpoint.cloudwatch.id
-  subnet_id       = aws_subnet.interface_endpoint.id
-}
-
-// secret manager vpc endpoint
-
-resource "aws_security_group" "secret_manager_vpc_endpoint" {
-  name   = "${var.project_name}-secret-manager-vpc-endpoint-sg"
-  vpc_id = aws_vpc.main.id
-  ingress {
-    from_port = 443
-    to_port   = 443
-    protocol  = "TCP"
-
-    cidr_blocks = [
-      aws_vpc.main.cidr_block
-    ]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [aws_vpc.main.cidr_block]
-    description = "Internal outbound any traffic"
-  }
-
-  tags = {
-    Name = "secret-manager-vpc-endpoint-sg"
-  }
-}
-
-resource "aws_vpc_endpoint" "secret_manager" {
-  vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.${var.region}.secretsmanager"
-  vpc_endpoint_type = "Interface"
-
-
-  security_group_ids = [
-    aws_security_group.secret_manager_vpc_endpoint.id
-  ]
-
-
-
-  private_dns_enabled = true
-  auto_accept         = true
-
-  tags = {
-    Name = "${var.project_name}-secret-manager-vpc-endpoint"
-  }
-
-}
-
-resource "aws_vpc_endpoint_subnet_association" "secret_manager" {
-  vpc_endpoint_id = aws_vpc_endpoint.secret_manager.id
-  subnet_id       = aws_subnet.interface_endpoint.id
-}
-
-// ecr enpoint
-
-resource "aws_security_group" "ecr_vpc_endpoint" {
-  name   = "${var.project_name}-ecr-vpc-endpoint-sg"
-  vpc_id = aws_vpc.main.id
-  ingress {
-    from_port = 443
-    to_port   = 443
-    protocol  = "TCP"
-
-    cidr_blocks = [
-      aws_vpc.main.cidr_block
-    ]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [aws_vpc.main.cidr_block]
-    description = "Internal outbound any traffic"
-  }
-
-  tags = {
-    Name = "ecr-vpc-endpoint-sg"
-  }
-}
-
-resource "aws_vpc_endpoint" "ecr" {
-  vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.${var.region}.ecr.dkr"
-  vpc_endpoint_type = "Interface"
-
-
-  security_group_ids = [
-    aws_security_group.secret_manager_vpc_endpoint.id
-  ]
-
-
-
-  private_dns_enabled = true
-  auto_accept         = true
-
-  tags = {
-    Name = "${var.project_name}-ecr-vpc-endpoint"
-  }
-
-}
-
-resource "aws_vpc_endpoint_subnet_association" "ecr" {
-  vpc_endpoint_id = aws_vpc_endpoint.ecr.id
-  subnet_id       = aws_subnet.interface_endpoint.id
 }
 

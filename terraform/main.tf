@@ -1,3 +1,4 @@
+
 terraform {
 
   backend "s3" {
@@ -6,7 +7,6 @@ terraform {
     region = "ap-northeast-2"
 
   }
-
 
 }
 
@@ -28,10 +28,13 @@ module "vpc_module" {
   source = "./modules/vpc"
   region = var.region
 
+  number_of_azs = 3
+
   cidr_block   = var.cidr_block
   project_name = var.project_name
   
   enable_vpc_interface_endpoint = true
+  interface_endpoint_service_names = var.interface_endpoint_service_names
 }
 
 
@@ -151,6 +154,9 @@ module "load_test_module" {
   source       = "./modules/load_test"
   project_name = var.project_name
   region       = var.region
+
+  enable_load_test = true
+
 
   k6_key_path = var.k6_key_path
 

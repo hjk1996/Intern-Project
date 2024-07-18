@@ -7,6 +7,11 @@ variable "region" {
 }
 
 
+variable "enable_load_test" {
+  type = bool
+}
+
+
 
 variable "k6_key_path" {
   type    = string
