@@ -47,7 +47,7 @@ variable "number_of_azs" {
 // ---------------------------
 // bastion 관련 변수
 variable "enable_bastion" {
-  type = bool
+  type        = bool
   description = "public subent에 bastion host를 생성할 지 여부를 결정합니다."
 }
 variable "bastion_key_path" {
@@ -182,6 +182,12 @@ variable "ecs_task_memory" {
 
 // ---------------------------
 // DNS 관련 변수
+variable "enable_dns" {
+  type        = bool
+  description = "ALB에 도메인 네임을 부여할 지에 대한 여부를 결정합니다."
+}
+
+
 variable "zone_name" {
   type        = string
   description = "사용할 도메인 이름"

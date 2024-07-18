@@ -1,3 +1,3 @@
 output "certificate_arn" {
-  value = aws_acm_certificate.main.arn
+  value = var.enable_dns ?  aws_acm_certificate.main[0].arn : null
 }

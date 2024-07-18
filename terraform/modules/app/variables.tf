@@ -100,5 +100,8 @@ variable "certificate_arn" {
 }
 
 
+variable "enable_dns" {
+  type = bool
+}
 
 

@@ -738,7 +738,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "width" : 24,
           "height" : 6,
           "properties" : {
-          "query" : "SOURCE '${aws_cloudwatch_log_group.app.name}' | fields @timestamp, @message, @logStream, @log\n| sort @timestamp desc\n| filter @message like /(?i)error/\n| limit 500\n",
+            "query" : "SOURCE '${aws_cloudwatch_log_group.app.name}' | fields @timestamp, @message, @logStream, @log\n| sort @timestamp desc\n| filter @message like /(?i)error/\n| limit 500\n",
             "region" : "${var.region}",
             "stacked" : false,
             "view" : "table",

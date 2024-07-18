@@ -41,6 +41,6 @@ variable "max_connections" {
 
 
 variable "ecs_metric_names" {
-  
+
 }
 

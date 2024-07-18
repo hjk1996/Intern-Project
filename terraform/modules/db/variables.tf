@@ -17,7 +17,7 @@ variable "vpc_id" {
 
 variable "number_of_azs" {
   type = number
-  
+
 }
 
 

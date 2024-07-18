@@ -32,8 +32,8 @@ module "vpc_module" {
 
   cidr_block   = var.cidr_block
   project_name = var.project_name
-  
-  enable_vpc_interface_endpoint = true
+
+  enable_vpc_interface_endpoint    = true
   interface_endpoint_service_names = var.interface_endpoint_service_names
 }
 
@@ -66,9 +66,9 @@ module "db_module" {
   region       = var.region
   project_name = var.project_name
 
-  cidr_block = var.cidr_block
+  cidr_block    = var.cidr_block
   number_of_azs = var.number_of_azs
-  vpc_id     = module.vpc_module.vpc_id
+  vpc_id        = module.vpc_module.vpc_id
 
   db_name               = var.db_name
   db_instance_class     = var.db_instance_class
@@ -82,7 +82,6 @@ module "db_module" {
   ]
 }
 
-// TODO: bastion toggle 가능하게 모듈 수정
 module "bastion_module" {
   source       = "./modules/bastion"
   region       = var.region
@@ -135,6 +134,7 @@ module "app_module" {
   min_task_count             = var.min_task_count
   max_task_count             = var.max_task_count
 
+  enable_dns      = var.enable_dns
   certificate_arn = module.dns_module.certificate_arn
 
   depends_on = [
@@ -147,6 +147,8 @@ module "app_module" {
 // TODO:  DNS 토글 가능하게 수정
 module "dns_module" {
   source = "./modules/dns"
+
+  enable_dns = var.enable_dns
 
   zone_name = var.zone_name
   lb_dns    = module.app_module.lb_dns
