@@ -34,10 +34,10 @@ resource "tls_private_key" "bastion_key" {
 // 생성한 key local에 저장
 resource "local_file" "bastion_key" {
   content  = tls_private_key.bastion_key.private_key_pem
-  filename = var.ssh_key_path
+  filename = var.bastion_key_path
 
   provisioner "local-exec" {
-    command = "chmod 400 ${var.ssh_key_path}"
+    command = "chmod 400 ${var.bastion_key_path}"
   }
 }
 

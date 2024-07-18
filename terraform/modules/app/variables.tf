@@ -28,6 +28,10 @@ variable "app_port" {
   type = number
 }
 
+variable "ecr_max_image_count" {
+  type = number
+}
+
 variable "public_subnet_ids" {
   type = list(string)
 }

@@ -11,3 +11,8 @@ variable "project_name" {
 variable "cidr_block" {
   type = string
 }
+
+
+variable "enable_vpc_interface_endpoint" {
+  type = bool
+}

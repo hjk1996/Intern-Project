@@ -1,78 +1,52 @@
 resource "aws_wafv2_web_acl" "main" {
-  name        = "${var.project_name}-alb-waf"
-  description = "Example of a managed rule."
-  scope       = "REGIONAL"
+  name  = "${var.project_name}-alb-waf"
+  scope = "REGIONAL"
+
 
   default_action {
     allow {}
+
   }
 
+  
   rule {
-    name     = "rule-1"
-    priority = 1
+    name     = "AWSManagedRulesCommonRuleSet"
+    priority = 10
+
+  
+
     override_action {
-      count {}
+      count {
+        
+      }
+
     }
 
     statement {
       managed_rule_group_statement {
         name        = "AWSManagedRulesCommonRuleSet"
         vendor_name = "AWS"
-
-        rule_action_override {
-          action_to_use {
-            count {}
-          }
-
-          name = "SizeRestrictions_QUERYSTRING"
-        }
-
-        rule_action_override {
-          action_to_use {
-            count {}
-          }
-
-          name = "NoUserAgent_HEADER"
-        }
-
-
       }
     }
+
     visibility_config {
-      cloudwatch_metrics_enabled = false
-      metric_name                = "AWSManagedRulesCommonRuleSet"
-      sampled_requests_enabled   = false
+      cloudwatch_metrics_enabled = true
+      metric_name                = "AWSManagedRulesCommonRuleSetMetric"
+      sampled_requests_enabled   = true
     }
   }
 
-  rule {
-    name     = "rule-2"
-    priority = 2
-    override_action {
-      count {}
-    }
 
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesSQLiRuleSet"
-        vendor_name = "AWS"
-      }
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = false
-      metric_name                = "AWSManagedRulesSQLiRuleSet"
-      sampled_requests_enabled   = false
-    }
-  }
-
-  tags = {
-    Tag1 = "Value1"
-    Tag2 = "Value2"
-  }
 
   visibility_config {
     cloudwatch_metrics_enabled = false
     metric_name                = "friendly-metric-name"
     sampled_requests_enabled   = false
   }
+}
+
+
+resource "aws_wafv2_web_acl_association" "alb" {
+  web_acl_arn  = aws_wafv2_web_acl.main.arn
+  resource_arn = var.alb_arn
 }

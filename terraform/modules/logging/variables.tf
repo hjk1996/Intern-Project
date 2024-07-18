@@ -22,6 +22,15 @@ variable "ecs_service_name" {
   type = string
 }
 
+variable "ecs_task_memory" {
+  type = number
+}
+
+variable "ecs_task_cpu" {
+  type = number
+}
+
+
 variable "db_cluster_identifier" {
   type = string
 }

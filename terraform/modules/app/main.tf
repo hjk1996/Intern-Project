@@ -17,10 +17,6 @@ resource "aws_ecr_repository" "app" {
     scan_on_push = true
   }
 
-  // ECR은 terraform destroy 되더라도 변경되게 설정
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
 }
 
 // ECR 리포지토리 라이프사이클 정책
@@ -33,42 +29,18 @@ resource "aws_ecr_lifecycle_policy" "app" {
       "rules" : [
         {
           "rulePriority" : 10,
-          "description" : "latest 태그가 붙은 이미지는 1개만 저장",
-          "selection" : {
-            "tagStatus" : "tagged",
-            "tagPrefixList" : ["latest"],
-            "countType" : "imageCountMoreThan",
-            "countNumber" : 1
-          },
-          "action" : {
-            "type" : "expire"
-          }
-        },
-        {
-          "rulePriority" : 20,
           "description" : "태그가 붙은 이미지는 총 30개만 저장",
           "selection" : {
             "tagStatus" : "tagged",
             "tagPatternList" : ["*"],
             "countType" : "imageCountMoreThan",
-            "countNumber" : 30
+            "countNumber" : var.ecr_max_image_count
           },
           "action" : {
             "type" : "expire"
           }
         },
-        {
-          "rulePriority" : 980,
-          "description" : "태그없는 이미지는 1개만 유지함",
-          "selection" : {
-            "tagStatus" : "untagged",
-            "countType" : "imageCountMoreThan",
-            "countNumber" : 1
-          },
-          "action" : {
-            "type" : "expire"
-          }
-        }
+        
       ]
     }
   )
@@ -328,9 +300,10 @@ resource "aws_security_group" "lb" {
 }
 
 resource "aws_lb" "app" {
-  name               = "${local.container_name}-alb"
-  security_groups    = [aws_security_group.lb.id]
-  internal           = false
+  name            = "${local.container_name}-alb"
+  security_groups = [aws_security_group.lb.id]
+  internal        = false
+
   load_balancer_type = "application"
   subnets            = var.public_subnet_ids
 

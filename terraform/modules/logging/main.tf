@@ -1,5 +1,6 @@
 
 
+
 data "aws_region" "current" {
 
 }
@@ -596,10 +597,16 @@ resource "aws_cloudwatch_dashboard" "main" {
         {
           "height" : 15,
           "width" : 24,
-          "y" : 0,
+          "y" : 10,
           "x" : 0,
           "type" : "explorer",
           "properties" : {
+            "labels" : [
+              {
+                "key" : "Application",
+                "value" : "${var.project_name}"
+              }
+            ],
             "metrics" : [
               {
                 "metricName" : "CPUUtilization",
@@ -617,28 +624,127 @@ resource "aws_cloudwatch_dashboard" "main" {
                 "stat" : "Sum"
               }
             ],
-            "labels" : [
-              {
-                "key" : "Application",
-                "value" : "${var.project_name}"
-              }
-            ],
+            "period" : 300,
+            "region" : "${var.region}",
+            "splitBy" : "",
+            "title" : "RDS metrics",
             "widgetOptions" : {
               "legend" : {
                 "position" : "bottom"
               },
-              "view" : "timeSeries",
-              "stacked" : false,
               "rowsPerPage" : 50,
+              "stacked" : false,
+              "view" : "timeSeries",
               "widgetsPerRow" : 2
-            },
-            "period" : 300,
-            "splitBy" : "",
-            "region" : "${var.region}",
-            "title" : "RDS metrics"
+            }
           }
         },
-        
+        {
+          "height" : 2,
+          "width" : 24,
+          "y" : 0,
+          "x" : 0,
+          "type" : "alarm",
+          "properties" : {
+            "title" : "ECS Alarms",
+            "alarms" : [
+              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.app_error_alarm.alarm_name}",
+              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.ecs_service_cpu.alarm_name}",
+              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.ecs_service_memory.alarm_name}",
+            ]
+          }
+        },
+        {
+          "height" : 2,
+          "width" : 24,
+          "y" : 2,
+          "x" : 0,
+          "type" : "alarm",
+          "properties" : {
+            "title" : "Database Alarms",
+            "alarms" : [
+              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.rds_cpu_writer.alarm_name}",
+              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.rds_cpu_reader.alarm_name}",
+              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.rds_connection_reader.alarm_name}",
+              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.rds_connection_writer.alarm_name}",
+            ]
+          }
+        },
+        {
+          "type" : "metric",
+          "x" : 0,
+          "y" : 4,
+          "width" : 6,
+          "height" : 6,
+          "properties" : {
+            "view" : "timeSeries",
+            "stacked" : false,
+            "metrics" : [
+              ["ECS/ContainerInsights", "RunningTaskCount", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}"]
+            ],
+            "region" : "${var.region}",
+            "title" : "ECS Service RunningTaskCount"
+          }
+        },
+        {
+          "type" : "metric",
+          "x" : 6,
+          "y" : 4,
+          "width" : 6,
+          "height" : 6,
+          "properties" : {
+            "metrics" : [
+              ["ECS/ContainerInsights", "CpuUtilized", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}"],
+              [".", "MemoryUtilized", ".", ".", ".", ".", { "visible" : false }]
+            ],
+            "view" : "gauge",
+            "region" : "${var.region}",
+            "yAxis" : {
+              "left" : {
+                "min" : 0,
+                "max" : "${var.ecs_task_cpu}"
+              }
+            },
+            "stat" : "Average",
+            "period" : 300,
+            "title" : "ECS Service Average CPUUtilized"
+          }
+        },
+        {
+          "type" : "metric",
+          "x" : 12,
+          "y" : 4,
+          "width" : 6,
+          "height" : 6,
+          "properties" : {
+            "view" : "gauge",
+            "metrics" : [
+              ["ECS/ContainerInsights", "MemoryUtilized", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}"]
+            ],
+            "region" : "${var.region}",
+            "yAxis" : {
+              "left" : {
+                "min" : 0,
+                "max" : "${var.ecs_task_memory}"
+              }
+            },
+            "title" : "ECS Service Average MemoryUtilized"
+          }
+        },
+        {
+          "type" : "log",
+          "x" : 0,
+          "y" : 10,
+          "width" : 24,
+          "height" : 6,
+          "properties" : {
+            "query" : "SOURCE '${aws_cloudwatch_log_group.app.name}' | fields @timestamp, @message, @logStream, @log\n| sort @timestamp desc\n| filter @message like /(?i)error/\n| limit 500\n",
+            "region" : "${var.region}",
+            "stacked" : false,
+            "view" : "table",
+            "title" : "Application Error Log"
+          }
+        }
       ]
     }
   )
