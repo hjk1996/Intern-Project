@@ -38,9 +38,8 @@ module "vpc_module" {
 }
 
 
-// TODO: 로깅 모듈에서 alarm으로 받고자 하는 것들 사용자가 설정할 수 있도록 리팩토링
-module "logging_module" {
-  source       = "./modules/logging"
+module "monitoring_module" {
+  source       = "./modules/monitoring"
   region       = var.region
   project_name = var.project_name
 
@@ -105,14 +104,13 @@ module "bastion_module" {
 
 }
 
-// TODO: app 모듈 리팩토링
 module "app_module" {
   source       = "./modules/app"
   region       = var.region
   project_name = var.project_name
 
-  log_group_name = module.logging_module.log_gorup_name
-  log_group_arn  = module.logging_module.log_group_arn
+  log_group_name = module.monitoring_module.log_gorup_name
+  log_group_arn  = module.monitoring_module.log_group_arn
 
   cidr_block        = var.cidr_block
   vpc_id            = module.vpc_module.vpc_id
