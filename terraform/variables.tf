@@ -85,16 +85,47 @@ variable "ecs_metric_alarms" {
   }))
   description = "ECS Service에서 모니터링하고 알람을 받을 지표에 대한 설정"
 
-  default = [ {
+  default = [{
     comparison_operator = "GreaterThanThreshold"
-    evaluation_periods = "2"
-    statistic = "Averaeg"
-    metric_name = "CPUUtilization"
-    period = "30"
-    threshold = "70"
-    enable_ok_action = false
-  } ]
+    evaluation_periods  = "2"
+    statistic           = "Average"
+    metric_name         = "CPUUtilization"
+    period              = "30"
+    threshold           = "70"
+    enable_ok_action    = false
+  }]
 }
+
+
+variable "rds_metric_alarms" {
+  type = list(object({
+    comparison_operator = string
+    evaluation_periods  = string
+    statistic           = string
+    metric_name         = string
+    period              = string
+    threshold           = string
+    enable_ok_action    = bool
+  }))
+  description = "RDS에서 모니터링하고 알람을 받을 지표에 대한 설정"
+
+  default = [{
+    comparison_operator = "GreaterThanOrEqualToThreshold"
+    evaluation_periods  = "2"
+    statistic           = "Maximum"
+    metric_name         = "CPUUtilization"
+    period              = "30"
+    threshold           = "70"
+    enable_ok_action    = false
+  }]
+
+
+
+
+}
+
+
+
 
 
 

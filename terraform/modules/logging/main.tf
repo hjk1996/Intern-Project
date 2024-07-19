@@ -8,7 +8,7 @@ locals {
   log_export_lambda_name  = "log-export-lambda"
   slack_alarm_lambda_name = "slack-alarm-lambda"
 
-      
+
 }
 
 // ---
@@ -436,9 +436,6 @@ resource "aws_iam_role_policy_attachment" "sns_trigger_lambda" {
 }
 
 
-
-
-
 resource "aws_cloudwatch_metric_alarm" "ecs" {
   count               = length(var.ecs_metric_alarms)
   alarm_name          = "${var.project_name}-ecs-service-${var.ecs_metric_alarms[count.index].metric_name}-alarm"
@@ -465,60 +462,21 @@ resource "aws_cloudwatch_metric_alarm" "ecs" {
   ] : null
 }
 
+resource "aws_cloudwatch_metric_alarm" "rds_writer" {
+  count               = length(var.rds_metric_alarms)
+  alarm_name          = "${var.project_name}-rds-writer-${var.rds_metric_alarms[count.index].metric_name}"
+  comparison_operator = var.rds_metric_alarms[count.index].comparison_operator
+  evaluation_periods  = var.rds_metric_alarms[count.index].evaluation_periods
+  metric_name         = var.rds_metric_alarms[count.index].metric_name
+  namespace           = "AWS/RDS"
+  period              = var.rds_metric_alarms[count.index].period
+  statistic           = var.rds_metric_alarms[count.index].statistic
+  threshold           = var.rds_metric_alarms[count.index].threshold
 
-
-
-
-// ECS Service memory
-resource "aws_cloudwatch_metric_alarm" "ecs_service_memory" {
-  alarm_name          = "${var.project_name}-ecs-service-average-MemoryUtilization"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2" # 연속된 두 평가 기간 동안 조건이 충족되어야 합니다.
-  metric_name         = "MemoryUtilization"
-  namespace           = "AWS/ECS"
-  period              = "30" # 30초마다 메트릭을 수집합니다.
-  statistic           = "Average"
-  threshold           = "70" # 메모리 사용량이 80%를 초과할 때 알람
-  alarm_description   = "This alarm monitors the average memory utilization of the ECS service."
-  actions_enabled     = true
-
-  dimensions = {
-    ClusterName = var.ecs_cluster_name # ECS 클러스터 이름
-    ServiceName = var.ecs_service_name # ECS 서비스 이름
-  }
-
-  alarm_actions = [
-    aws_sns_topic.app_error.arn # 알람이 발생했을 때 알림을 받을 SNS 주제 ARN
-  ]
-
-  ok_actions = [
+  alarm_actions = [aws_sns_topic.app_error.arn]
+  ok_actions = var.rds_metric_alarms[count.index].enable_ok_action ? [
     aws_sns_topic.app_error.arn
-  ]
-
-}
-
-
-
-
-// ecs 서비스의 평균적인 메모리 사용량이 ~~를 초과하면 전송되는 알람
-
-
-
-
-
-// DB 관련 알람
-// 라이터 CPU 사용률
-resource "aws_cloudwatch_metric_alarm" "rds_cpu_writer" {
-  alarm_name          = "${var.project_name}-alarm-rds-writer-CPU"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/RDS"
-  period              = "30"
-  statistic           = "Maximum"
-  threshold           = "70"
-  alarm_description   = "RDS CPU Alarm for ${var.project_name} DB writer"
-  alarm_actions       = [aws_sns_topic.app_error.arn]
+  ] : null
 
   dimensions = {
     DBClusterIdentifier = var.db_cluster_identifier
@@ -526,18 +484,21 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu_writer" {
   }
 }
 
-// 리더 CPU 사용률
-resource "aws_cloudwatch_metric_alarm" "rds_cpu_reader" {
-  alarm_name          = "${var.project_name}-alarm-rds-reader-CPU"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
+resource "aws_cloudwatch_metric_alarm" "rds_reader" {
+  count               = length(var.rds_metric_alarms)
+  alarm_name          = "${var.project_name}-rds-reader-${var.rds_metric_alarms[count.index].metric_name}"
+  comparison_operator = var.rds_metric_alarms[count.index].comparison_operator
+  evaluation_periods  = var.rds_metric_alarms[count.index].evaluation_periods
+  metric_name         = var.rds_metric_alarms[count.index].metric_name
   namespace           = "AWS/RDS"
-  period              = "30"
-  statistic           = "Maximum"
-  threshold           = "70"
-  alarm_description   = "RDS CPU Alarm for ${var.project_name} DB readers"
-  alarm_actions       = [aws_sns_topic.app_error.arn]
+  period              = var.rds_metric_alarms[count.index].period
+  statistic           = var.rds_metric_alarms[count.index].statistic
+  threshold           = var.rds_metric_alarms[count.index].threshold
+
+  alarm_actions = [aws_sns_topic.app_error.arn]
+  ok_actions = var.rds_metric_alarms[count.index].enable_ok_action ? [
+    aws_sns_topic.app_error.arn
+  ] : null
 
   dimensions = {
     DBClusterIdentifier = var.db_cluster_identifier
@@ -545,43 +506,6 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu_reader" {
   }
 }
 
-
-resource "aws_cloudwatch_metric_alarm" "rds_connection_writer" {
-  alarm_name          = "${var.project_name}-alarm-rds-writer-DatabaseConnections"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "DatabaseConnections"
-  namespace           = "AWS/RDS"
-  period              = 60
-  statistic           = "Maximum"
-  threshold           = var.max_connections
-  alarm_description   = "RDS Maximum connection Alarm for ${var.project_name} DB writers"
-  alarm_actions       = [aws_sns_topic.app_error.arn]
-
-  dimensions = {
-    DBClusterIdentifier = var.db_cluster_identifier
-    Role                = "WRITER"
-  }
-}
-
-
-resource "aws_cloudwatch_metric_alarm" "rds_connection_reader" {
-  alarm_name          = "${var.project_name}-alarm-rds-reader-DatabaseConnections"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "DatabaseConnections"
-  namespace           = "AWS/RDS"
-  period              = 60
-  statistic           = "Maximum"
-  threshold           = var.max_connections
-  alarm_description   = "RDS Maximum connection Alarm for ${var.project_name} DB reader"
-  alarm_actions       = [aws_sns_topic.app_error.arn]
-
-  dimensions = {
-    DBClusterIdentifier = var.db_cluster_identifier
-    Role                = "READER"
-  }
-}
 
 
 
@@ -647,7 +571,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "type" : "alarm",
           "properties" : {
             "title" : "ECS Alarms",
-            "alarms" :  [
+            "alarms" : [
               for alarm in aws_cloudwatch_metric_alarm.ecs : "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${alarm.alarm_name}"
             ]
           }
@@ -660,12 +584,15 @@ resource "aws_cloudwatch_dashboard" "main" {
           "type" : "alarm",
           "properties" : {
             "title" : "Database Alarms",
-            "alarms" : [
-              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.rds_cpu_writer.alarm_name}",
-              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.rds_cpu_reader.alarm_name}",
-              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.rds_connection_reader.alarm_name}",
-              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.rds_connection_writer.alarm_name}",
-            ]
+            "alarms" : concat(
+              [
+                for alarm in aws_cloudwatch_metric_alarm.rds_reader : "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${alarm.alarm_name}"
+              ],
+              [
+                for alarm in aws_cloudwatch_metric_alarm.rds_writer : "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${alarm.alarm_name}"
+              ],
+
+            )
           }
         },
         {

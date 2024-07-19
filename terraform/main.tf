@@ -50,6 +50,7 @@ module "logging_module" {
 
 
   ecs_metric_alarms = var.ecs_metric_alarms
+  rds_metric_alarms = var.rds_metric_alarms
   slack_webhook_url = var.slack_webhook_url
   slack_channel     = var.slack_channel
 

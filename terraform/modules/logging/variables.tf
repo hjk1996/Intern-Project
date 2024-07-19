@@ -52,6 +52,21 @@ variable "ecs_metric_alarms" {
   }))
 }
 
+variable "rds_metric_alarms" {
+  type = list(object({
+    comparison_operator = string
+    evaluation_periods  = string
+    statistic           = string
+    metric_name         = string
+    period              = string
+    threshold           = string
+    enable_ok_action    = bool
+  }))
+}
+
+
+
+
 
 variable "cloudwatch_logs_retention_in_days" {
   type = number
