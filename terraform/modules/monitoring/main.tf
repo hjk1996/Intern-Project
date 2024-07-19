@@ -38,26 +38,24 @@ resource "aws_s3_bucket_policy" "app_log" {
           "Effect" : "Allow",
           "Resource" : aws_s3_bucket.app_log.arn,
           "Principal" : { "Service" : "logs.${var.region}.amazonaws.com" },
-          "Condition" : {
-            "ArnLike" : {
-              "aws:SourceArn" : [
-                "${aws_cloudwatch_log_group.app.arn}:*",
-              ]
-            }
-          }
+          # "Condition" : {
+          #   "ArnLike" : {
+          #     "aws:SourceArn" : [
+          #       "${aws_cloudwatch_log_group.app.arn}:*",
+          #     ]
+          #   }
+          # }
         },
         {
           "Action" : "s3:PutObject",
           "Effect" : "Allow",
           "Resource" : "${aws_s3_bucket.app_log.arn}/*",
           "Principal" : { "Service" : "logs.${var.region}.amazonaws.com" },
-          "Condition" : {
-            "ArnLike" : {
-              "aws:SourceArn" : [
-                "${aws_cloudwatch_log_group.app.arn}:*",
-              ]
+          "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control"
+                }
             }
-          }
         }
       ]
     }
@@ -287,8 +285,9 @@ resource "aws_scheduler_schedule" "cloudwatch_log_s3_export" {
   # 매일 새벽 1시에 trigger
   # 분 시 일 월 요일 년
   # ?는 특정 요일이 없다는 뜻임
-  # schedule_expression = "rate(5 minutes)"
-  schedule_expression = "cron(* 1 * * ? *)"
+  # UTC 시간으로 16시는 한국 시간으로 1시
+  schedule_expression = "cron(* 16 * * ? *)"
+
 
   target {
     # event bridge가 스케쥴마다 트리거할 대상

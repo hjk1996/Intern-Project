@@ -17,7 +17,7 @@ provider "aws" {
   default_tags {
     tags = {
       terraform   = true
-      Environment = "prod"
+      Environment = var.environment
       Application = var.project_name
     }
   }

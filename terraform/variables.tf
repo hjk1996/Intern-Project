@@ -11,6 +11,12 @@ variable "region" {
   description = "서비스를 배포할 region"
 }
 
+variable "environment" {
+  type = string
+  default = "prod"
+  description = "배포 환경"
+}
+
 
 
 // ---------------------------
@@ -19,6 +25,11 @@ variable "cidr_block" {
   type        = string
   default     = "10.0.0.0/16"
   description = "VPC CIDR Block"
+
+  validation {
+    condition = contains(split("/", var.cidr_block), "16")
+    error_message = "CIDR은 16비트"
+  }
 }
 // TODO
 variable "enable_vpc_interface_endpoint" {
@@ -28,6 +39,7 @@ variable "enable_vpc_interface_endpoint" {
 }
 variable "interface_endpoint_service_names" {
   type        = list(string)
+  
   description = "Interface Endpoint를 생성시킬 AWS 서비스 이름 목록"
 }
 
@@ -48,7 +60,7 @@ variable "number_of_azs" {
 // bastion 관련 변수
 variable "enable_bastion" {
   type        = bool
-  description = "public subent에 bastion host를 생성할 지 여부를 결정합니다."
+  description = "public subnet에 bastion host를 생성할 지 여부를 결정합니다."
 }
 variable "bastion_key_path" {
   type        = string
@@ -123,12 +135,6 @@ variable "rds_metric_alarms" {
 
 
 }
-
-
-
-
-
-
 
 variable "slack_channel" {
   type        = string
@@ -236,35 +242,6 @@ variable "additional_env_vars" {
   default     = null
   description = "container에 부여할 추가적인 환경 변수들"
 }
-
-
-
-# variable "ecs_alarms" {
-#   type = list(object({
-#     metric_name = string
-#     period = number
-#     evaluation_periods = number
-#     threshold = number
-#     statistic = string
-#     comparison_operator = string 
-#     alarm_action = bool
-#     ok_action = bool
-#   }))
-# }
-
-# variable "rds_alarms" {
-#   type = list(object({
-#     metric_name = string
-#     period = number
-#     evaluation_periods = number
-#     threshold = number
-#     statistic = string
-#     comparison_operator = string 
-#     alarm_action = bool
-#     ok_action = bool
-#   }))
-# }
-
 
 
 // ---------------------------
