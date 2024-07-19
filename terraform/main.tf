@@ -5,7 +5,6 @@ terraform {
     bucket = "lguplus-intern-project-tfstate"
     key    = "tfstate"
     region = "ap-northeast-2"
-
   }
 
 }
@@ -143,7 +142,6 @@ module "app_module" {
 }
 
 
-// TODO:  DNS 토글 가능하게 수정
 module "dns_module" {
   source = "./modules/dns"
 
@@ -167,7 +165,6 @@ module "load_test_module" {
   region       = var.region
 
   enable_load_test = true
-
 
   k6_key_path = var.k6_key_path
 

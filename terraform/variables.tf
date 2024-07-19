@@ -31,7 +31,6 @@ variable "cidr_block" {
     error_message = "CIDR은 16비트"
   }
 }
-// TODO
 variable "enable_vpc_interface_endpoint" {
   type        = bool
   default     = true
@@ -130,10 +129,6 @@ variable "rds_metric_alarms" {
     threshold           = "70"
     enable_ok_action    = false
   }]
-
-
-
-
 }
 
 variable "slack_channel" {
@@ -250,8 +245,6 @@ variable "enable_dns" {
   type        = bool
   description = "ALB에 도메인 네임을 부여할 지에 대한 여부를 결정합니다."
 }
-
-
 variable "zone_name" {
   type        = string
   description = "사용할 도메인 이름"
