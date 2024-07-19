@@ -181,28 +181,31 @@ resource "aws_ecs_task_definition" "app" {
           hostPort      = var.app_port
         }
       ]
-      environment = [
-        {
-          name  = "DB_SECRET_NAME"
-          value = var.db_secret_arn
-        },
-        {
-          name  = "READER_ENDPOINT"
-          value = var.db_reader_endpoint
-        },
-        {
-          name  = "WRITER_ENDPOINT"
-          value = var.db_writer_endpoint
-        },
-        {
-          name  = "DB_NAME"
-          value = var.db_name
-        },
-        {
-          name  = "APP_PORT"
-          value = "${tostring(var.app_port)}"
-        }
-      ]
+      environment = concat(
+        [
+          {
+            name  = "DB_SECRET_NAME"
+            value = var.db_secret_arn
+          },
+          {
+            name  = "READER_ENDPOINT"
+            value = var.db_reader_endpoint
+          },
+          {
+            name  = "WRITER_ENDPOINT"
+            value = var.db_writer_endpoint
+          },
+          {
+            name  = "DB_NAME"
+            value = var.db_name
+          },
+          {
+            name  = "APP_PORT"
+            value = "${tostring(var.app_port)}"
+          }
+        ],
+        var.additional_env_vars == null ? [] : var.additional_env_vars
+      )
 
       logConfiguration = {
         logDriver = "awslogs"
@@ -271,7 +274,6 @@ resource "aws_ecs_service" "app" {
 
 // alb security group
 resource "aws_security_group" "lb" {
-
   name   = "${local.container_name}-lb-sg"
   vpc_id = var.vpc_id
 
@@ -329,25 +331,22 @@ resource "aws_lb_target_group" "ecs_app" {
 }
 
 
-resource "aws_lb_listener" "https" {
+resource "aws_lb_listener" "main" {
   load_balancer_arn = aws_lb.app.arn
-  port              = 443
-  protocol          = "HTTPS"
+  port              = var.enable_dns ? 443 : 80
+  protocol          = var.enable_dns ? "HTTPS" : "HTTP"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = var.certificate_arn
+  certificate_arn   = var.enable_dns ? var.certificate_arn : null
 
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.ecs_app.arn
   }
 
-  depends_on = [
-    var.certificate_arn
-  ]
-
 }
 
 resource "aws_lb_listener" "http_redirect" {
+  count             = var.enable_dns ? 1 : 0
   load_balancer_arn = aws_lb.app.arn
   port              = 80
   protocol          = "HTTP"
@@ -377,22 +376,28 @@ resource "aws_appautoscaling_target" "ecs" {
   service_namespace  = "ecs"
 }
 
-resource "aws_appautoscaling_policy" "cpu_scaling_policy" {
-  name               = "${var.project_name}-cpu-scaling-policy"
+
+resource "aws_appautoscaling_policy" "target_tracking" {
+  count              = length(var.predefined_target_tracking_scaling_options)
+  name               = "${var.project_name}-${var.predefined_target_tracking_scaling_options[count.index].predefined_metric_type}-scaling-policy"
   policy_type        = "TargetTrackingScaling"
   resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.app.name}"
   scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
   service_namespace  = aws_appautoscaling_target.ecs.service_namespace
 
-
   target_tracking_scaling_policy_configuration {
-    target_value = var.ecs_cpu_utilization_target
+    target_value = var.predefined_target_tracking_scaling_options[count.index].target_value
     predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+      predefined_metric_type = var.predefined_target_tracking_scaling_options[count.index].predefined_metric_type
     }
-    scale_in_cooldown  = var.ecs_scale_in_cooldown
-    scale_out_cooldown = var.ecs_scale_out_cooldown
+    scale_in_cooldown  = var.predefined_target_tracking_scaling_options[count.index].scale_in_cooldown
+    scale_out_cooldown = var.predefined_target_tracking_scaling_options[count.index].scale_out_cooldown
   }
 }
+
+
+
+
+
 
 

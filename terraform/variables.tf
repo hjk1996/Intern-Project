@@ -59,6 +59,46 @@ variable "bastion_key_path" {
 // ---------------------------
 // 모니터링 관련 변수
 
+variable "cloudwatch_logs_retention_in_days" {
+  type        = number
+  description = "cloudwatch logs에 로그가 저장되는 기간"
+}
+
+
+variable "log_s3_lifecycle" {
+  type = object({
+    standard_ia = number
+    glacier     = number
+  })
+  description = "며칠 뒤에 s3 오브젝트의 클래스가 해당 클래스로 전환되는지 결정"
+}
+
+variable "ecs_metric_alarms" {
+  type = list(object({
+    comparison_operator = string
+    evaluation_periods  = string
+    statistic           = string
+    metric_name         = string
+    period              = string
+    threshold           = string
+    enable_ok_action    = bool
+  }))
+  description = "ECS Service에서 모니터링하고 알람을 받을 지표에 대한 설정"
+
+  default = [ {
+    comparison_operator = "GreaterThanThreshold"
+    evaluation_periods = "2"
+    statistic = "Averaeg"
+    metric_name = "CPUUtilization"
+    period = "30"
+    threshold = "70"
+    enable_ok_action = false
+  } ]
+}
+
+
+
+
 variable "slack_channel" {
   type        = string
   description = "알람 메시지를 보낼 slack channel 이름"
@@ -124,21 +164,24 @@ variable "ecr_max_image_count" {
   description = "ECR에 저장할 최대 이미지 갯수"
 }
 
-variable "ecs_cpu_utilization_target" {
-  type        = number
-  description = "Autoscaling 기준이 되는 ECS Service의 평균적인 CPU 사용률(%)"
-}
 
+variable "predefined_target_tracking_scaling_options" {
+  type = list(object({
+    predefined_metric_type = string
+    target_value           = number
+    scale_in_cooldown      = number
+    scale_out_cooldown     = number
+  }))
 
-variable "ecs_scale_in_cooldown" {
-  type        = number
-  description = "scale in 쿨타임"
-}
+  default = [{
+    predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    target_value           = 50
+    scale_in_cooldown      = 300
+    scale_out_cooldown     = 10
+  }]
 
+  description = "target tracking 오토 스케일링 정책"
 
-variable "ecs_scale_out_cooldown" {
-  type        = number
-  description = "scale out 쿨타임"
 }
 
 
@@ -151,6 +194,19 @@ variable "ecs_task_memory" {
   type        = number
   description = "ECS Task에 부여될 Memory 용량 (MB)"
 }
+
+variable "additional_env_vars" {
+  type = list(object(
+    {
+      key   = string
+      value = string
+    }
+  ))
+  default     = null
+  description = "container에 부여할 추가적인 환경 변수들"
+}
+
+
 
 # variable "ecs_alarms" {
 #   type = list(object({

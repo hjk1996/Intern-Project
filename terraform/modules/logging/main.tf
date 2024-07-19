@@ -1,9 +1,3 @@
-
-
-
-data "aws_region" "current" {
-
-}
 data "aws_caller_identity" "current" {
 
 }
@@ -13,6 +7,8 @@ locals {
   metric_name             = "AppErrorCount"
   log_export_lambda_name  = "log-export-lambda"
   slack_alarm_lambda_name = "slack-alarm-lambda"
+
+      
 }
 
 // ---
@@ -20,7 +16,7 @@ locals {
 resource "aws_cloudwatch_log_group" "app" {
   name = "${var.project_name}-application-log-group"
   // 로그 보존 기간
-  retention_in_days = 7
+  retention_in_days = var.cloudwatch_logs_retention_in_days
 }
 
 
@@ -41,7 +37,7 @@ resource "aws_s3_bucket_policy" "app_log" {
           "Action" : "s3:GetBucketAcl",
           "Effect" : "Allow",
           "Resource" : aws_s3_bucket.app_log.arn,
-          "Principal" : { "Service" : "logs.${data.aws_region.current.name}.amazonaws.com" },
+          "Principal" : { "Service" : "logs.${var.region}.amazonaws.com" },
           "Condition" : {
             "ArnLike" : {
               "aws:SourceArn" : [
@@ -54,7 +50,7 @@ resource "aws_s3_bucket_policy" "app_log" {
           "Action" : "s3:PutObject",
           "Effect" : "Allow",
           "Resource" : "${aws_s3_bucket.app_log.arn}/*",
-          "Principal" : { "Service" : "logs.${data.aws_region.current.name}.amazonaws.com" },
+          "Principal" : { "Service" : "logs.${var.region}.amazonaws.com" },
           "Condition" : {
             "ArnLike" : {
               "aws:SourceArn" : [
@@ -77,12 +73,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "app_log_config" {
     status = "Enabled"
 
     transition {
-      days          = 30
+      days          = var.log_s3_lifecycle.standard_ia
       storage_class = "STANDARD_IA"
     }
 
     transition {
-      days          = 90
+      days          = var.log_s3_lifecycle.glacier
       storage_class = "GLACIER"
     }
 
@@ -103,7 +99,7 @@ resource "aws_iam_policy" "cloudwatch_log" {
         {
           "Effect" : "Allow",
           "Action" : "logs:CreateLogGroup",
-          "Resource" : "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
+          "Resource" : "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:*"
         },
         {
           "Effect" : "Allow",
@@ -441,17 +437,18 @@ resource "aws_iam_role_policy_attachment" "sns_trigger_lambda" {
 
 
 
-// ecs 서비스의 평균적인 cpu 사용량이 80를 초과하면 전송되는 알람
-resource "aws_cloudwatch_metric_alarm" "ecs_service_cpu" {
-  alarm_name          = "${var.project_name}-ecs-service-average-CPUUtilization"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2" # 연속된 두 평가 기간 동안 조건이 충족되어야 합니다.
-  metric_name         = "CPUUtilization"
+
+
+resource "aws_cloudwatch_metric_alarm" "ecs" {
+  count               = length(var.ecs_metric_alarms)
+  alarm_name          = "${var.project_name}-ecs-service-${var.ecs_metric_alarms[count.index].metric_name}-alarm"
+  comparison_operator = var.ecs_metric_alarms[count.index].comparison_operator
+  evaluation_periods  = var.ecs_metric_alarms[count.index].evaluation_periods # 연속된 두 평가 기간 동안 조건이 충족되어야 합니다.
+  metric_name         = var.ecs_metric_alarms[count.index].metric_name
   namespace           = "AWS/ECS"
-  period              = "30" # 30초마다 메트릭을 수집합니다.
-  statistic           = "Average"
-  threshold           = "70" # CPU 사용량이 80%를 초과할 때 알람
-  alarm_description   = "This alarm monitors the average CPU utilization of the ECS service."
+  period              = var.ecs_metric_alarms[count.index].period # 30초마다 메트릭을 수집합니다.
+  statistic           = var.ecs_metric_alarms[count.index].statistic
+  threshold           = var.ecs_metric_alarms[count.index].threshold # CPU 사용량이 80%를 초과할 때 알람
   actions_enabled     = true
 
   dimensions = {
@@ -463,12 +460,13 @@ resource "aws_cloudwatch_metric_alarm" "ecs_service_cpu" {
     aws_sns_topic.app_error.arn # 알람이 발생했을 때 알림을 받을 SNS 주제 ARN
   ]
 
-  ok_actions = [
+  ok_actions = var.ecs_metric_alarms[count.index].enable_ok_action ? [
     aws_sns_topic.app_error.arn
-  ]
-
-
+  ] : null
 }
+
+
+
 
 
 // ECS Service memory
@@ -589,6 +587,8 @@ resource "aws_cloudwatch_metric_alarm" "rds_connection_reader" {
 
 // cloudwatch dashboard
 
+
+
 resource "aws_cloudwatch_dashboard" "main" {
   dashboard_name = "${var.project_name}-dashboard"
   dashboard_body = jsonencode(
@@ -647,10 +647,8 @@ resource "aws_cloudwatch_dashboard" "main" {
           "type" : "alarm",
           "properties" : {
             "title" : "ECS Alarms",
-            "alarms" : [
-              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.app_error_alarm.alarm_name}",
-              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.ecs_service_cpu.alarm_name}",
-              "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${aws_cloudwatch_metric_alarm.ecs_service_memory.alarm_name}",
+            "alarms" :  [
+              for alarm in aws_cloudwatch_metric_alarm.ecs : "arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:${alarm.alarm_name}"
             ]
           }
         },

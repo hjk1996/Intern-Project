@@ -44,6 +44,12 @@ module "logging_module" {
   region       = var.region
   project_name = var.project_name
 
+
+  cloudwatch_logs_retention_in_days = var.cloudwatch_logs_retention_in_days
+  log_s3_lifecycle                  = var.log_s3_lifecycle
+
+
+  ecs_metric_alarms = var.ecs_metric_alarms
   slack_webhook_url = var.slack_webhook_url
   slack_channel     = var.slack_channel
 
@@ -51,10 +57,6 @@ module "logging_module" {
   ecs_service_name = module.app_module.ecs_service_name
   ecs_task_cpu     = var.ecs_task_cpu
   ecs_task_memory  = var.ecs_task_memory
-
-  ecs_metric_names = {
-
-  }
 
 
   db_cluster_identifier = module.db_module.db_cluster_identifier
@@ -125,14 +127,12 @@ module "app_module" {
 
   ecr_max_image_count = var.ecr_max_image_count
 
-  app_port                   = var.app_port
-  ecs_task_cpu               = var.ecs_task_cpu
-  ecs_task_memory            = var.ecs_task_memory
-  ecs_cpu_utilization_target = var.ecs_cpu_utilization_target
-  ecs_scale_in_cooldown      = var.ecs_scale_in_cooldown
-  ecs_scale_out_cooldown     = var.ecs_scale_out_cooldown
-  min_task_count             = var.min_task_count
-  max_task_count             = var.max_task_count
+  app_port                                   = var.app_port
+  ecs_task_cpu                               = var.ecs_task_cpu
+  ecs_task_memory                            = var.ecs_task_memory
+  predefined_target_tracking_scaling_options = var.predefined_target_tracking_scaling_options
+  min_task_count                             = var.min_task_count
+  max_task_count                             = var.max_task_count
 
   enable_dns      = var.enable_dns
   certificate_arn = module.dns_module.certificate_arn

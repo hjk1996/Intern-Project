@@ -73,27 +73,41 @@ variable "max_task_count" {
   type = number
 }
 
-variable "ecs_cpu_utilization_target" {
-  type = number
+variable "predefined_target_tracking_scaling_options" {
+  type = list(object({
+    predefined_metric_type = string
+    target_value           = number
+    scale_in_cooldown      = number
+    scale_out_cooldown     = number
+  }))
 }
 
-
-variable "ecs_scale_in_cooldown" {
-  type = number
-}
-
-
-variable "ecs_scale_out_cooldown" {
-  type = number
-}
 
 variable "ecs_task_cpu" {
   type = number
 }
 
+
 variable "ecs_task_memory" {
   type = number
 }
+
+
+
+variable "additional_env_vars" {
+  type = list(object(
+    {
+      key   = string
+      value = string
+    }
+  ))
+
+  default = null
+
+}
+
+
+
 
 variable "certificate_arn" {
   type = string
@@ -103,5 +117,8 @@ variable "certificate_arn" {
 variable "enable_dns" {
   type = bool
 }
+
+
+
 
 
