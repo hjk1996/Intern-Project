@@ -51,11 +51,11 @@ resource "aws_s3_bucket_policy" "app_log" {
           "Effect" : "Allow",
           "Resource" : "${aws_s3_bucket.app_log.arn}/*",
           "Principal" : { "Service" : "logs.${var.region}.amazonaws.com" },
-          "Condition": {
-                "StringEquals": {
-                    "s3:x-amz-acl": "bucket-owner-full-control"
-                }
+          "Condition" : {
+            "StringEquals" : {
+              "s3:x-amz-acl" : "bucket-owner-full-control"
             }
+          }
         }
       ]
     }
@@ -354,12 +354,12 @@ data "archive_file" "slack_alarm_lambda" {
 }
 
 
-// cloudwatch log를 s3로 export 하기 위한 lambda
+// slack에 알람보내는 lambda 함수
 resource "aws_lambda_function" "slack_alarm" {
   function_name    = "${var.project_name}-${local.slack_alarm_lambda_name}"
   filename         = "${path.module}/${local.slack_alarm_lambda_name}.zip"
   handler          = "lambda_function.lambda_handler"
-  role             = aws_iam_role.cloudwatch_log_export_lambda.arn
+  role             = aws_iam_role.slack_alarm_lambda.arn
   source_code_hash = data.archive_file.slack_alarm_lambda.output_base64sha256
   timeout          = 120
 
@@ -387,9 +387,7 @@ resource "aws_lambda_permission" "allow_sns" {
   source_arn    = aws_sns_topic.app_error.arn
 }
 
-
-// slack channel에 alarm을 보내기 위한 lambda의 iam role
-resource "aws_iam_role" "slack_alarm_role" {
+resource "aws_iam_role" "slack_alarm_lambda" {
   name = "${var.project_name}-slack-alarm-role"
   assume_role_policy = jsonencode(
     {
@@ -407,6 +405,8 @@ resource "aws_iam_role" "slack_alarm_role" {
     }
   )
 }
+
+
 
 resource "aws_iam_policy" "sns_trigger_lambda" {
   name        = "${var.project_name}-slack-alarm-lambda-policy"
@@ -430,7 +430,7 @@ resource "aws_iam_policy" "sns_trigger_lambda" {
 
 
 resource "aws_iam_role_policy_attachment" "sns_trigger_lambda" {
-  role       = aws_iam_role.slack_alarm_role.name
+  role       = aws_iam_role.slack_alarm_lambda.name
   policy_arn = aws_iam_policy.sns_trigger_lambda.arn
 }
 
@@ -509,9 +509,6 @@ resource "aws_cloudwatch_metric_alarm" "rds_reader" {
 
 
 // cloudwatch dashboard
-
-
-
 resource "aws_cloudwatch_dashboard" "main" {
   dashboard_name = "${var.project_name}-dashboard"
   dashboard_body = jsonencode(

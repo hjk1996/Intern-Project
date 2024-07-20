@@ -57,8 +57,8 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
-// task role
-resource "aws_iam_role" "task_role" {
+// ecs task role
+resource "aws_iam_role" "ecs_task" {
   name = "${local.container_name}-task-role"
   assume_role_policy = jsonencode(
     {
@@ -76,6 +76,7 @@ resource "aws_iam_role" "task_role" {
     }
   )
 }
+
 
 resource "aws_iam_policy" "secret_manager_access" {
   name = "${local.container_name}-secret-manager-access"
@@ -99,13 +100,13 @@ resource "aws_iam_policy" "secret_manager_access" {
 }
 
 resource "aws_iam_role_policy_attachment" "secret_manager_access" {
-  role       = aws_iam_role.task_role.name
+  role       = aws_iam_role.ecs_task.name
   policy_arn = aws_iam_policy.secret_manager_access.arn
 }
 
-// execution role
-resource "aws_iam_role" "execution_role" {
-  name = "${local.container_name}-execution-role"
+// ecs execution role
+resource "aws_iam_role" "ecs_execution" {
+  name = "${local.container_name}-execution-role-2"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -120,8 +121,9 @@ resource "aws_iam_role" "execution_role" {
   })
 }
 
-resource "aws_iam_policy" "log" {
-  name = "${local.container_name}-cloudwatch-logs-access"
+
+resource "aws_iam_policy" "cloudwatch_logs_access" {
+  name = "${local.container_name}-cloudwatch-logs-access-2"
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -142,15 +144,14 @@ resource "aws_iam_policy" "log" {
 
 }
 
-
 resource "aws_iam_role_policy_attachment" "basic" {
-  role       = aws_iam_role.execution_role.name
+  role       = aws_iam_role.ecs_execution.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "log" {
-  role       = aws_iam_role.execution_role.name
-  policy_arn = aws_iam_policy.log.arn
+  role       = aws_iam_role.ecs_execution.name
+  policy_arn = aws_iam_policy.cloudwatch_logs_access.arn
 
 }
 
@@ -159,8 +160,8 @@ resource "aws_iam_role_policy_attachment" "log" {
 resource "aws_ecs_task_definition" "app" {
   family = local.container_name
 
-  execution_role_arn = aws_iam_role.execution_role.arn
-  task_role_arn      = aws_iam_role.task_role.arn
+  execution_role_arn = aws_iam_role.ecs_execution.arn
+  task_role_arn      = aws_iam_role.ecs_task.arn
 
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"

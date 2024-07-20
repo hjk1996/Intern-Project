@@ -12,8 +12,8 @@ variable "region" {
 }
 
 variable "environment" {
-  type = string
-  default = "prod"
+  type        = string
+  default     = "prod"
   description = "배포 환경"
 }
 
@@ -27,7 +27,7 @@ variable "cidr_block" {
   description = "VPC CIDR Block"
 
   validation {
-    condition = contains(split("/", var.cidr_block), "16")
+    condition     = contains(split("/", var.cidr_block), "16")
     error_message = "CIDR은 16비트"
   }
 }
@@ -37,8 +37,8 @@ variable "enable_vpc_interface_endpoint" {
   description = "AWS Service에 대한 interface endpoint를 활성화 시킬 것인지에 대한 여부"
 }
 variable "interface_endpoint_service_names" {
-  type        = list(string)
-  
+  type = list(string)
+
   description = "Interface Endpoint를 생성시킬 AWS 서비스 이름 목록"
 }
 

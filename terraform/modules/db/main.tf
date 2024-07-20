@@ -87,7 +87,7 @@ resource "aws_rds_cluster" "main" {
 }
 
 // DB Instance
-resource "aws_rds_cluster_instance" "cluster_instances" {
+resource "aws_rds_cluster_instance" "main" {
   count                   = var.number_of_azs
   identifier              = "${var.project_name}-db-${count.index}"
   cluster_identifier      = aws_rds_cluster.main.id
@@ -97,3 +97,10 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   engine                  = aws_rds_cluster.main.engine
   engine_version          = aws_rds_cluster.main.engine_version
 }
+
+
+
+
+
+
+

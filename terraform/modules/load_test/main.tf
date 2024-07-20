@@ -1,4 +1,3 @@
-
 resource "aws_vpc" "main" {
   count      = var.enable_load_test ? 1 : 0
   cidr_block = "172.168.0.0/16"
@@ -59,7 +58,7 @@ resource "aws_subnet" "main" {
   }
 }
 
-resource "aws_security_group" "k6_sg" {
+resource "aws_security_group" "k6" {
   count = var.enable_load_test ? 1 : 0
 
   vpc_id = aws_vpc.main[0].id
@@ -101,7 +100,8 @@ resource "aws_security_group" "k6_sg" {
 
 
 # ssh key
-resource "tls_private_key" "k6_key" {
+# 
+resource "tls_private_key" "k6" {
   count     = var.enable_load_test ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 4096
@@ -111,7 +111,7 @@ resource "tls_private_key" "k6_key" {
 resource "local_file" "k6_key" {
   count = var.enable_load_test ? 1 : 0
 
-  content  = tls_private_key.k6_key[0].private_key_pem
+  content  = tls_private_key.k6[0].private_key_pem
   filename = var.k6_key_path
 
   provisioner "local-exec" {
@@ -120,12 +120,12 @@ resource "local_file" "k6_key" {
 }
 
 
-
-resource "aws_key_pair" "k6_key" {
+resource "aws_key_pair" "k6" {
   count      = var.enable_load_test ? 1 : 0
   key_name   = "k6-key-pair"
-  public_key = tls_private_key.k6_key[0].public_key_openssh
+  public_key = tls_private_key.k6[0].public_key_openssh
 }
+
 
 resource "aws_iam_role" "k6" {
   count = var.enable_load_test ? 1 : 0
@@ -170,7 +170,7 @@ resource "aws_instance" "k6" {
   subnet_id            = aws_subnet.main[0].id
   iam_instance_profile = aws_iam_instance_profile.k6[0].name
   vpc_security_group_ids = [
-    aws_security_group.k6_sg[0].id
+    aws_security_group.k6[0].id
   ]
 
   root_block_device {
@@ -179,7 +179,7 @@ resource "aws_instance" "k6" {
 
 
   associate_public_ip_address = true
-  key_name                    = aws_key_pair.k6_key[0].key_name
+  key_name                    = aws_key_pair.k6[0].key_name
   user_data                   = <<-EOF
               #!/bin/bash
               sudo gpg -k
