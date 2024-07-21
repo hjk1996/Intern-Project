@@ -267,5 +267,3 @@ variable "k6_key_path" {
   type        = string
   description = "부하 테스트용 인스턴스에 접근하기 위한 private key가 저장될 로컬 경로"
 }
-
-

@@ -157,6 +157,18 @@ module "waf_module" {
   alb_arn      = module.app_module.alb_arn
 }
 
+module "time_scaling_scheduler_module" {
+  source       = "./modules/time_scaling_scheduler"
+  project_name = var.project_name
+  region       = var.region
+
+  ecs_cluster_name = module.app_module.ecs_cluster_name
+  ecs_service_name = module.app_module.ecs_service_name
+
+}
+
+
+
 
 
 module "load_test_module" {
