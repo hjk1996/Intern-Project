@@ -65,7 +65,11 @@ variable "db_name" {
   type = string
 }
 
-variable "min_task_count" {
+variable "work_time_min_task_count" {
+  type = number
+}
+
+variable "not_work_time_min_task_count" {
   type = number
 }
 

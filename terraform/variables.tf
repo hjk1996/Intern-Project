@@ -178,11 +178,18 @@ variable "app_port" {
   description = "애플리케이션이 통신에 사용할 포트 번호"
 }
 
-variable "min_task_count" {
+variable "work_time_min_task_count" {
   type        = number
-  default     = 3
-  description = "ECS Task의 최소 실행 갯수"
+  default     = 5
+  description = "근무 시간의 ECS Task의 최소 실행 갯수"
 }
+
+variable "not_work_time_min_task_count" {
+  type = number
+  default = 3
+  description = "비근무 시간의 ECS Task의 최소 실행 갯수"
+}
+
 
 variable "max_task_count" {
   type        = number

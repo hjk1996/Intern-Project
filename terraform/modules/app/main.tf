@@ -4,6 +4,7 @@ data "aws_region" "current" {
 
 locals {
   container_name = "${var.project_name}-app"
+  utc_time_gap = 9
 }
 
 
@@ -253,8 +254,8 @@ resource "aws_ecs_service" "app" {
   name            = "${var.project_name}-service"
   cluster         = aws_ecs_cluster.main.arn
   task_definition = aws_ecs_task_definition.app.arn
+  desired_count = var.work_time_min_task_count
   launch_type     = "FARGATE"
-  desired_count   = var.min_task_count
 
 
   network_configuration {
@@ -268,6 +269,13 @@ resource "aws_ecs_service" "app" {
     container_port   = var.app_port
     container_name   = local.container_name
     target_group_arn = aws_lb_target_group.ecs_app.arn
+  }
+
+  lifecycle {
+    ignore_changes = [ 
+      desired_count
+     ]
+
   }
 
 
@@ -371,7 +379,7 @@ resource "aws_lb_listener" "http_redirect" {
 // ECS Task scaling 정책 (CPU)
 resource "aws_appautoscaling_target" "ecs" {
   max_capacity       = var.max_task_count
-  min_capacity       = var.min_task_count
+  min_capacity       = var.work_time_min_task_count
   resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.app.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
@@ -396,9 +404,33 @@ resource "aws_appautoscaling_policy" "target_tracking" {
   }
 }
 
+resource "aws_appautoscaling_scheduled_action" "work_time" {
+  name               = "ecs"
+  service_namespace  = aws_appautoscaling_target.ecs.service_namespace
+  resource_id        = aws_appautoscaling_target.ecs.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
+  schedule           = "cron(* 18 * * ? *)"
+
+  scalable_target_action {
+    min_capacity = var.work_time_min_task_count
+    max_capacity = var.max_task_count
+  }
+}
 
 
 
+resource "aws_appautoscaling_scheduled_action" "not_work_time" {
+  name               = "ecs"
+  service_namespace  = aws_appautoscaling_target.ecs.service_namespace
+  resource_id        = aws_appautoscaling_target.ecs.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
+  schedule           = "cron(* 4 * * ? *)"
 
+  scalable_target_action {
+    min_capacity = var.not_work_time_min_task_count
+    max_capacity = var.max_task_count
+  }
 
+  depends_on = [ aws_appautoscaling_scheduled_action.work_time ]
+}
 

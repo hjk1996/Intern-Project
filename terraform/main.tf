@@ -129,8 +129,11 @@ module "app_module" {
   ecs_task_cpu                               = var.ecs_task_cpu
   ecs_task_memory                            = var.ecs_task_memory
   predefined_target_tracking_scaling_options = var.predefined_target_tracking_scaling_options
-  min_task_count                             = var.min_task_count
-  max_task_count                             = var.max_task_count
+  work_time_min_task_count = var.work_time_min_task_count
+  not_work_time_min_task_count = var.not_work_time_min_task_count
+  max_task_count = var.max_task_count
+  
+
 
   enable_dns      = var.enable_dns
   certificate_arn = module.dns_module.certificate_arn
@@ -155,16 +158,6 @@ module "waf_module" {
   source       = "./modules/waf"
   project_name = var.project_name
   alb_arn      = module.app_module.alb_arn
-}
-
-module "time_scaling_scheduler_module" {
-  source       = "./modules/time_scaling_scheduler"
-  project_name = var.project_name
-  region       = var.region
-
-  ecs_cluster_name = module.app_module.ecs_cluster_name
-  ecs_service_name = module.app_module.ecs_service_name
-
 }
 
 

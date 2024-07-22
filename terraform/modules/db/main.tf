@@ -72,7 +72,7 @@ resource "aws_rds_cluster" "main" {
   cluster_identifier   = "${var.project_name}-db-cluster"
   availability_zones   = local.azs
   engine               = "aurora-mysql"
-  engine_version       = "5.7.mysql_aurora.2.11.1"
+  engine_version       = "5.7.mysql_aurora.2.11.5"
   database_name        = var.db_name
   storage_encrypted    = true
   db_subnet_group_name = aws_db_subnet_group.main.name
