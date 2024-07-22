@@ -129,10 +129,10 @@ module "app_module" {
   ecs_task_cpu                               = var.ecs_task_cpu
   ecs_task_memory                            = var.ecs_task_memory
   predefined_target_tracking_scaling_options = var.predefined_target_tracking_scaling_options
-  work_time_min_task_count = var.work_time_min_task_count
-  not_work_time_min_task_count = var.not_work_time_min_task_count
-  max_task_count = var.max_task_count
-  
+  work_time_min_task_count                   = var.work_time_min_task_count
+  not_work_time_min_task_count               = var.not_work_time_min_task_count
+  max_task_count                             = var.max_task_count
+
 
 
   enable_dns      = var.enable_dns
@@ -153,6 +153,7 @@ module "dns_module" {
   zone_name = var.zone_name
   lb_dns    = module.app_module.lb_dns
 }
+
 
 module "waf_module" {
   source       = "./modules/waf"

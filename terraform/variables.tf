@@ -185,8 +185,8 @@ variable "work_time_min_task_count" {
 }
 
 variable "not_work_time_min_task_count" {
-  type = number
-  default = 3
+  type        = number
+  default     = 3
   description = "비근무 시간의 ECS Task의 최소 실행 갯수"
 }
 

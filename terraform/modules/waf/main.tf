@@ -1,3 +1,4 @@
+
 resource "aws_wafv2_web_acl" "main" {
   name  = "${var.project_name}-alb-waf"
   scope = "REGIONAL"
@@ -11,7 +12,7 @@ resource "aws_wafv2_web_acl" "main" {
 
   rule {
     name     = "AWSManagedRulesCommonRuleSet"
-    priority = 10
+    priority = 1
 
 
 
@@ -32,6 +33,28 @@ resource "aws_wafv2_web_acl" "main" {
     visibility_config {
       cloudwatch_metrics_enabled = true
       metric_name                = "AWSManagedRulesCommonRuleSetMetric"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "AWS-AWSManagedRulesSQLiRuleSet"
+    priority = 2
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesSQLiRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "AWS-AWSManagedRulesSQLiRuleSet"
       sampled_requests_enabled   = true
     }
   }

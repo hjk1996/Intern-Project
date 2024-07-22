@@ -4,7 +4,7 @@ data "aws_region" "current" {
 
 locals {
   container_name = "${var.project_name}-app"
-  utc_time_gap = 9
+  utc_time_gap   = 9
 }
 
 
@@ -221,6 +221,12 @@ resource "aws_ecs_task_definition" "app" {
 
     }
   ])
+
+   lifecycle {
+    ignore_changes = [
+      container_definitions
+    ]
+  }
 }
 
 // task의 security group
@@ -254,7 +260,7 @@ resource "aws_ecs_service" "app" {
   name            = "${var.project_name}-service"
   cluster         = aws_ecs_cluster.main.arn
   task_definition = aws_ecs_task_definition.app.arn
-  desired_count = var.work_time_min_task_count
+  desired_count   = var.work_time_min_task_count
   launch_type     = "FARGATE"
 
 
@@ -272,9 +278,9 @@ resource "aws_ecs_service" "app" {
   }
 
   lifecycle {
-    ignore_changes = [ 
+    ignore_changes = [
       desired_count
-     ]
+    ]
 
   }
 
@@ -409,7 +415,7 @@ resource "aws_appautoscaling_scheduled_action" "work_time" {
   service_namespace  = aws_appautoscaling_target.ecs.service_namespace
   resource_id        = aws_appautoscaling_target.ecs.resource_id
   scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
-  schedule           = "cron(* 18 * * ? *)"
+  schedule           = "cron(* 0 * * ? *)"
 
   scalable_target_action {
     min_capacity = var.work_time_min_task_count
@@ -424,13 +430,13 @@ resource "aws_appautoscaling_scheduled_action" "not_work_time" {
   service_namespace  = aws_appautoscaling_target.ecs.service_namespace
   resource_id        = aws_appautoscaling_target.ecs.resource_id
   scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
-  schedule           = "cron(* 4 * * ? *)"
+  schedule           = "cron(* 9 * * ? *)"
 
   scalable_target_action {
     min_capacity = var.not_work_time_min_task_count
     max_capacity = var.max_task_count
   }
 
-  depends_on = [ aws_appautoscaling_scheduled_action.work_time ]
+  depends_on = [aws_appautoscaling_scheduled_action.work_time]
 }
 
