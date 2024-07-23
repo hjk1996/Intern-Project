@@ -20,6 +20,14 @@ variable "number_of_azs" {
 
 }
 
+variable "ecs_service_name" {
+  type = string
+}
+
+variable "ecs_cluster_name" {
+  type = string
+}
+
 
 
 variable "db_private_subnet_ids" {

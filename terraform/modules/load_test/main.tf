@@ -164,8 +164,8 @@ resource "aws_iam_instance_profile" "k6" {
 
 resource "aws_instance" "k6" {
   count                = var.enable_load_test ? 1 : 0
-  ami                  = "ami-09cb0f54fe24c54a6" # Arm Ubuntu
-  instance_type        = "t4g.large"
+  ami                  = "ami-062cf18d655c0b1e8" # x64 Ubuntu
+  instance_type        = "t3.large"
   availability_zone    = "${var.region}a"
   subnet_id            = aws_subnet.main[0].id
   iam_instance_profile = aws_iam_instance_profile.k6[0].name

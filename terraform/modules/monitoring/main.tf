@@ -517,7 +517,7 @@ resource "aws_cloudwatch_dashboard" "main" {
         {
           "height" : 15,
           "width" : 24,
-          "y" : 10,
+          "y" : 16,
           "x" : 0,
           "type" : "explorer",
           "properties" : {
@@ -596,7 +596,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "x" : 0,
           "y" : 4,
           "width" : 6,
-          "height" : 6,
+          "height" : 12,
           "properties" : {
             "view" : "timeSeries",
             "stacked" : false,
@@ -633,8 +633,8 @@ resource "aws_cloudwatch_dashboard" "main" {
         },
         {
           "type" : "metric",
-          "x" : 12,
-          "y" : 4,
+          "x" : 6,
+          "y" : 10,
           "width" : 6,
           "height" : 6,
           "properties" : {
@@ -655,7 +655,7 @@ resource "aws_cloudwatch_dashboard" "main" {
         {
           "type" : "log",
           "x" : 0,
-          "y" : 10,
+          "y" : 31,
           "width" : 24,
           "height" : 6,
           "properties" : {
@@ -665,6 +665,72 @@ resource "aws_cloudwatch_dashboard" "main" {
             "view" : "table",
             "title" : "Application Error Log"
           }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 10,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    [ "ECS/ContainerInsights", "CpuUtilized", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}" ]
+                ],
+                "region": "${var.region}",
+                "title": "ECS Service Average CpuUtilized"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 4,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    [ "ECS/ContainerInsights", "MemoryUtilized", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}" ]
+                ],
+                "region": "${var.region}",
+                "title": "ECS Service Average MemoryUtilized"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 18,
+            "y": 4,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    [ "ECS/ContainerInsights", "NetworkRxBytes", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}" ],
+                    [ ".", "NetworkTxBytes", ".", ".", ".", "." ]
+                ],
+                "region": "${var.region}",
+                "title": "ECS Service Network Metrics"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 18,
+            "y": 10,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    [ "ECS/ContainerInsights", "StorageReadBytes", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}" ],
+                    [ ".", "StorageWriteBytes", ".", ".", ".", "." ]
+                ],
+                "region": "${var.region}",
+                "title": "ECS Service Storage Metrics"
+            }
         }
       ]
     }

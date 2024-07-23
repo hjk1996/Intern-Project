@@ -71,6 +71,9 @@ module "db_module" {
   number_of_azs = var.number_of_azs
   vpc_id        = module.vpc_module.vpc_id
 
+  ecs_cluster_name = module.app_module.ecs_cluster_name
+  ecs_service_name = module.app_module.ecs_service_name
+
   db_name               = var.db_name
   db_instance_class     = var.db_instance_class
   db_private_subnet_ids = module.vpc_module.db_private_subnet_ids
@@ -140,7 +143,6 @@ module "app_module" {
 
   depends_on = [
     module.vpc_module,
-    module.db_module,
   ]
 }
 
