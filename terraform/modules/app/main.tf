@@ -173,7 +173,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = local.container_name
-      image     = "${aws_ecr_repository.app.repository_url}:48"
+      image     = "${aws_ecr_repository.app.repository_url}:50"
       cpu       = var.ecs_task_cpu
       memory    = var.ecs_task_memory
       essential = true
@@ -230,7 +230,6 @@ resource "aws_ecs_task_definition" "app" {
 }
 
 // task의 security group
-
 resource "aws_security_group" "ecs_task" {
 
   name   = "${local.container_name}-sg"

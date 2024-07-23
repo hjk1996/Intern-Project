@@ -95,7 +95,7 @@ func insertDummyData(db *gorm.DB) error {
 			-- 최근 생성된 Employee ID 가져오기
 			SET @employee_id = LAST_INSERT_ID();
 			-- Article 생성
-			INSERT INTO articles (employee_id, content) VALUES (@employee_id, CONCAT('Article content for employee ', i));
+			INSERT INTO articles (id, content) VALUES (@employee_id, CONCAT('Article content for employee ', i));
 			-- 다음 반복으로 증가
 			SET i = i + 1;
 		END WHILE;
