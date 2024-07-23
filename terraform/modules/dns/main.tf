@@ -50,3 +50,40 @@ resource "aws_route53_record" "alb" {
   ttl     = "60"
   records = [var.lb_dns]
 }
+
+
+resource "aws_lb_listener" "main" {
+  load_balancer_arn = var.alb_arn
+  port              = var.enable_dns ? 443 : 80
+  protocol          = var.enable_dns ? "HTTPS" : "HTTP"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.enable_dns ? aws_acm_certificate.main[0].arn : null
+
+  default_action {
+    type             = "forward"
+    target_group_arn = var.ecs_target_group_arn
+  }
+
+
+
+}
+
+resource "aws_lb_listener" "http_redirect" {
+  count             = var.enable_dns ? 1 : 0
+  load_balancer_arn = var.alb_arn
+  port              = 80
+  protocol          = "HTTP"
+
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = 443
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+

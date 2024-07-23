@@ -284,7 +284,9 @@ resource "aws_ecs_service" "app" {
 
   }
 
-
+  depends_on = [ 
+    aws_lb.app
+   ]
 }
 
 // alb security group
@@ -346,37 +348,6 @@ resource "aws_lb_target_group" "ecs_app" {
 }
 
 
-resource "aws_lb_listener" "main" {
-  load_balancer_arn = aws_lb.app.arn
-  port              = var.enable_dns ? 443 : 80
-  protocol          = var.enable_dns ? "HTTPS" : "HTTP"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = var.enable_dns ? var.certificate_arn : null
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.ecs_app.arn
-  }
-
-}
-
-resource "aws_lb_listener" "http_redirect" {
-  count             = var.enable_dns ? 1 : 0
-  load_balancer_arn = aws_lb.app.arn
-  port              = 80
-  protocol          = "HTTP"
-
-
-  default_action {
-    type = "redirect"
-
-    redirect {
-      port        = 443
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-}
 
 
 

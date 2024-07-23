@@ -16,9 +16,8 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main[0].id
 
   tags = {
-    Name = "$k6-igw"
+    Name = "k6-igw"
   }
-
 }
 resource "aws_route_table" "public" {
   count = var.enable_load_test ? 1 : 0
@@ -99,8 +98,7 @@ resource "aws_security_group" "k6" {
 }
 
 
-# ssh key
-# 
+// ssh key 
 resource "tls_private_key" "k6" {
   count     = var.enable_load_test ? 1 : 0
   algorithm = "RSA"

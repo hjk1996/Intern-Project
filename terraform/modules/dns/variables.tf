@@ -9,3 +9,11 @@ variable "zone_name" {
 variable "lb_dns" {
   type = string
 }
+
+variable "alb_arn" {
+  type = string
+}
+
+variable "ecs_target_group_arn" {
+  type = string
+}

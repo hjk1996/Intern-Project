@@ -154,6 +154,8 @@ module "dns_module" {
 
   zone_name = var.zone_name
   lb_dns    = module.app_module.lb_dns
+  alb_arn = module.app_module.alb_arn
+  ecs_target_group_arn = module.app_module.ecs_target_group_arn
 }
 
 
