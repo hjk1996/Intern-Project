@@ -9,44 +9,47 @@ locals {
 
 
 // ECR 리포지토리
-resource "aws_ecr_repository" "app" {
-  name                 = local.container_name
-  image_tag_mutability = "IMMUTABLE"
-  force_delete         = true
+# resource "aws_ecr_repository" "app" {
+#   name                 = local.container_name
+#   image_tag_mutability = "IMMUTABLE"
+#   force_delete         = true
 
-  image_scanning_configuration {
-    scan_on_push = true
-  }
+#   image_scanning_configuration {
+#     scan_on_push = true
+#   }
 
-}
+#   lifecycle {
+#     prevent_destroy = true
+#   }
+# }
 
-// ECR 리포지토리 라이프사이클 정책
-resource "aws_ecr_lifecycle_policy" "app" {
-  repository = aws_ecr_repository.app.name
+# // ECR 리포지토리 라이프사이클 정책
+# resource "aws_ecr_lifecycle_policy" "app" {
+#   repository = aws_ecr_repository.app.name
 
-  policy = jsonencode(
+#   policy = jsonencode(
 
-    {
-      "rules" : [
-        {
-          "rulePriority" : 10,
-          "description" : "태그가 붙은 이미지는 총 30개만 저장",
-          "selection" : {
-            "tagStatus" : "tagged",
-            "tagPatternList" : ["*"],
-            "countType" : "imageCountMoreThan",
-            "countNumber" : var.ecr_max_image_count
-          },
-          "action" : {
-            "type" : "expire"
-          }
-        },
+#     {
+#       "rules" : [
+#         {
+#           "rulePriority" : 10,
+#           "description" : "태그가 붙은 이미지는 총 30개만 저장",
+#           "selection" : {
+#             "tagStatus" : "tagged",
+#             "tagPatternList" : ["*"],
+#             "countType" : "imageCountMoreThan",
+#             "countNumber" : var.ecr_max_image_count
+#           },
+#           "action" : {
+#             "type" : "expire"
+#           }
+#         },
 
-      ]
-    }
-  )
+#       ]
+#     }
+#   )
 
-}
+# }
 
 resource "aws_ecs_cluster" "main" {
 
@@ -173,7 +176,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = local.container_name
-      image     = "${aws_ecr_repository.app.repository_url}:50"
+      image     = "${var.repository_url}:51"
       cpu       = var.ecs_task_cpu
       memory    = var.ecs_task_memory
       essential = true

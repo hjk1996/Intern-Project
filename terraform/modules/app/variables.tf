@@ -6,6 +6,12 @@ variable "project_name" {
 
 }
 
+variable "repository_url" {
+  type = string
+}
+
+
+
 variable "log_group_arn" {
   type = string
 }
@@ -25,10 +31,6 @@ variable "cidr_block" {
 }
 
 variable "app_port" {
-  type = number
-}
-
-variable "ecr_max_image_count" {
   type = number
 }
 

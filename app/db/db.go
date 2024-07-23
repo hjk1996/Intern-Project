@@ -85,7 +85,8 @@ func insertDummyData(db *gorm.DB) error {
 	db.Exec(dropProcedureSQL)
 
 	// 스토어드 프로시저 생성 쿼리
-	createProcedureSQL := `
+	createProcedureSQL := 
+	`
 	CREATE PROCEDURE InsertDummyData()
 	BEGIN
 		DECLARE i INT DEFAULT 1;

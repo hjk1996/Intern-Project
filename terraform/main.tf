@@ -114,6 +114,8 @@ module "app_module" {
   log_group_name = module.monitoring_module.log_gorup_name
   log_group_arn  = module.monitoring_module.log_group_arn
 
+  repository_url = var.repository_url
+
   cidr_block        = var.cidr_block
   vpc_id            = module.vpc_module.vpc_id
   public_subnet_ids = module.vpc_module.public_subnet_ids
@@ -125,8 +127,7 @@ module "app_module" {
   db_secret_arn         = module.db_module.db_secret_arn
   db_writer_endpoint    = module.db_module.db_writer_endpoint
 
-
-  ecr_max_image_count = var.ecr_max_image_count
+  
 
   app_port                                   = var.app_port
   ecs_task_cpu                               = var.ecs_task_cpu

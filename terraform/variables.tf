@@ -197,11 +197,12 @@ variable "max_task_count" {
   description = "ECS Task의 최대 실행 갯수"
 }
 
-
-variable "ecr_max_image_count" {
-  type        = number
-  description = "ECR에 저장할 최대 이미지 갯수"
+variable "repository_url" {
+  type = string
+  description = "컨테이너 이미지 레지스트리 주소"
 }
+
+
 
 
 variable "predefined_target_tracking_scaling_options" {
