@@ -198,7 +198,7 @@ variable "max_task_count" {
 }
 
 variable "repository_url" {
-  type = string
+  type        = string
   description = "컨테이너 이미지 레지스트리 주소"
 }
 

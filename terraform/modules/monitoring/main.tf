@@ -542,6 +542,26 @@ resource "aws_cloudwatch_dashboard" "main" {
                 "metricName" : "DatabaseConnections",
                 "resourceType" : "AWS::RDS::DBInstance",
                 "stat" : "Sum"
+              },
+              {
+                "metricName" : "ReadIOPS",
+                "resourceType" : "AWS::RDS::DBInstance",
+                "stat" : "Average"
+              },
+              {
+                "metricName" : "WriteIOPS",
+                "resourceType" : "AWS::RDS::DBInstance",
+                "stat" : "Average"
+              },
+              {
+                "metricName" : "ReadThroughput",
+                "resourceType" : "AWS::RDS::DBInstance",
+                "stat" : "Average"
+              },
+              {
+                "metricName" : "WriteThroughput",
+                "resourceType" : "AWS::RDS::DBInstance",
+                "stat" : "Average"
               }
             ],
             "period" : 300,

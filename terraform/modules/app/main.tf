@@ -286,9 +286,9 @@ resource "aws_ecs_service" "app" {
 
   }
 
-  depends_on = [ 
+  depends_on = [
     aws_lb.app
-   ]
+  ]
 }
 
 // alb security group

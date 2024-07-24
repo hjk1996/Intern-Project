@@ -127,7 +127,7 @@ module "app_module" {
   db_secret_arn         = module.db_module.db_secret_arn
   db_writer_endpoint    = module.db_module.db_writer_endpoint
 
-  
+
 
   app_port                                   = var.app_port
   ecs_task_cpu                               = var.ecs_task_cpu
@@ -144,6 +144,7 @@ module "app_module" {
 
   depends_on = [
     module.vpc_module,
+
   ]
 }
 
@@ -153,9 +154,9 @@ module "dns_module" {
 
   enable_dns = var.enable_dns
 
-  zone_name = var.zone_name
-  lb_dns    = module.app_module.lb_dns
-  alb_arn = module.app_module.alb_arn
+  zone_name            = var.zone_name
+  lb_dns               = module.app_module.lb_dns
+  alb_arn              = module.app_module.alb_arn
   ecs_target_group_arn = module.app_module.ecs_target_group_arn
 }
 
