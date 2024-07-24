@@ -190,8 +190,8 @@ resource "aws_instance" "k6" {
 
 
   provisioner "file" {
-    source      = "${path.module}/stress_test.js"
-    destination = "/home/ubuntu/stress_test.js"
+    source      = "${path.module}/load_test.js"
+    destination = "/home/ubuntu/load_test.js"
 
     connection {
       type        = "ssh"
@@ -213,23 +213,6 @@ resource "aws_instance" "k6" {
     }
   }
 
-
-
-
-  provisioner "remote-exec" {
-    inline = [
-      "export TARGET_URL=${var.lb_dns}",
-    ]
-
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file(var.k6_key_path)
-      host        = self.public_ip
-    }
-  }
-
-
   tags = {
     Name = "k6-instance"
   }
@@ -238,13 +221,13 @@ resource "aws_instance" "k6" {
 resource "null_resource" "load_test_file" {
   count = var.enable_load_test ? 1 : 0
   triggers = {
-    file_md5_1 = md5(file("${path.module}/stress_test.js"))
+    file_md5_1 = md5(file("${path.module}/load_test.js"))
     file_md5_2 = md5(file("${path.module}/spike_test.js"))
   }
 
   provisioner "file" {
-    source      = "${path.module}/stress_test.js"
-    destination = "/home/ubuntu/stress_test.js"
+    source      = "${path.module}/load_test.js"
+    destination = "/home/ubuntu/load_test.js"
 
     connection {
       type        = "ssh"

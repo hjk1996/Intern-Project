@@ -388,7 +388,7 @@ resource "aws_appautoscaling_scheduled_action" "work_time" {
   service_namespace  = aws_appautoscaling_target.ecs.service_namespace
   resource_id        = aws_appautoscaling_target.ecs.resource_id
   scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
-  schedule           = "cron(* ${9-local.utc_time_gap} * * ? *)"
+  schedule           = "cron(* ${9 - local.utc_time_gap} * * ? *)"
 
   scalable_target_action {
     min_capacity = var.work_time_min_task_count
@@ -403,7 +403,7 @@ resource "aws_appautoscaling_scheduled_action" "not_work_time" {
   service_namespace  = aws_appautoscaling_target.ecs.service_namespace
   resource_id        = aws_appautoscaling_target.ecs.resource_id
   scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
-  schedule           = "cron(* ${18-local.utc_time_gap} * * ? *)"
+  schedule           = "cron(* ${18 - local.utc_time_gap} * * ? *)"
 
   scalable_target_action {
     min_capacity = var.not_work_time_min_task_count
