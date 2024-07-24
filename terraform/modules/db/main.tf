@@ -7,7 +7,7 @@ locals {
 
   azs = [for n in range(var.number_of_azs) : "${var.region}${local.az_alphabets[n]}"]
 
-
+ 
   new_deployment_lambda_name = "new_deployment_lambda"
 
 }
@@ -140,21 +140,7 @@ resource "aws_iam_policy" "new_deployment_lambda" {
           ],
           "Resource" : "arn:aws:ecs:${var.region}:${data.aws_caller_identity.current.account_id}:service/${var.ecs_cluster_name}/${var.ecs_service_name}"
         },
-        {
-          "Effect" : "Allow",
-          "Action" : "logs:CreateLogGroup",
-          "Resource" : "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:*"
-        },
-        {
-          "Effect" : "Allow",
-          "Action" : [
-            "logs:CreateLogStream",
-            "logs:PutLogEvents"
-          ],
-          "Resource" : [
-            "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.new_deployment_on_rotation.function_name}:*"
-          ]
-        }
+        
       ]
     }
   )
@@ -164,6 +150,11 @@ resource "aws_iam_policy" "new_deployment_lambda" {
 resource "aws_iam_role_policy_attachment" "new_deployment_lambda" {
   role       = aws_iam_role.new_deployment_lambda.name
   policy_arn = aws_iam_policy.new_deployment_lambda.arn
+}
+
+resource "aws_iam_role_policy_attachment" "basic_role" {
+  role = aws_iam_role.new_deployment_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 data "archive_file" "new_deployment_lambda" {

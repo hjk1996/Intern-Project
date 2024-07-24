@@ -132,14 +132,6 @@ resource "aws_iam_policy" "s3_log_export" {
             "logs:DescribeLogGroups"
           ],
           "Resource" : "${aws_cloudwatch_log_group.app.arn}:*"
-        },
-        {
-          "Action" : [
-            "logs:CreateLogStream",
-            "logs:PutLogEvents"
-          ],
-          "Effect" : "Allow",
-          "Resource" : "arn:aws:logs:*:*:*"
         }
       ]
     }
@@ -170,6 +162,12 @@ resource "aws_iam_role" "cloudwatch_log_export_lambda" {
 resource "aws_iam_role_policy_attachment" "s3_access" {
   role       = aws_iam_role.cloudwatch_log_export_lambda.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
+
+
+resource "aws_iam_role_policy_attachment" "log_export_lambda_basic_role" {
+  role       = aws_iam_role.cloudwatch_log_export_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "cloudwatch_log_export" {
@@ -429,7 +427,7 @@ resource "aws_iam_policy" "sns_trigger_lambda" {
 }
 
 resource "aws_iam_role_policy_attachment" "slack_lambda_basic_role" {
-  role = aws_iam_role.slack_alarm_lambda.name
+  role       = aws_iam_role.slack_alarm_lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
