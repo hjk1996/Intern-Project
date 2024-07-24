@@ -428,6 +428,11 @@ resource "aws_iam_policy" "sns_trigger_lambda" {
 
 }
 
+resource "aws_iam_role_policy_attachment" "slack_lambda_basic_role" {
+  role = aws_iam_role.slack_alarm_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 
 resource "aws_iam_role_policy_attachment" "sns_trigger_lambda" {
   role       = aws_iam_role.slack_alarm_lambda.name
