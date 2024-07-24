@@ -575,7 +575,7 @@ resource "aws_cloudwatch_dashboard" "main" {
               "rowsPerPage" : 50,
               "stacked" : false,
               "view" : "timeSeries",
-              "widgetsPerRow" : 2
+              "widgetsPerRow" : 4
             }
           }
         },
