@@ -57,6 +57,8 @@ func Init() {
 
 	var employee models.Employee
 
+
+
 	result := DB.First(&employee, 1)
 	// TODO: 데이터 없을 때 데이터 추가하기
 	if result.Error != nil {
