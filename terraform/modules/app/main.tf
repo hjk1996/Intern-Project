@@ -141,10 +141,10 @@ resource "aws_iam_policy" "cloudwatch_logs_access" {
           "Resource" : "${var.log_group_arn}:*"
         }
 
-      ] }
-      
-      
-       )
+    ] }
+
+
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "basic" {

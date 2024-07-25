@@ -567,7 +567,7 @@ resource "aws_cloudwatch_dashboard" "main" {
                 "stat" : "Average"
               }
             ],
-            "period" : 300,
+            "period" : 30,
             "region" : "${var.region}",
             "splitBy" : "",
             "title" : "RDS metrics",
@@ -627,6 +627,7 @@ resource "aws_cloudwatch_dashboard" "main" {
               ["ECS/ContainerInsights", "RunningTaskCount", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}"]
             ],
             "region" : "${var.region}",
+            "period" : 30,
             "title" : "ECS Service RunningTaskCount"
           }
         },
@@ -650,7 +651,7 @@ resource "aws_cloudwatch_dashboard" "main" {
               }
             },
             "stat" : "Average",
-            "period" : 300,
+            "period" : 30,
             "title" : "ECS Service Average CPUUtilized"
           }
         },
@@ -672,6 +673,8 @@ resource "aws_cloudwatch_dashboard" "main" {
                 "max" : "${var.ecs_task_memory}"
               }
             },
+            "stat" : "Average",
+            "period" : 30,
             "title" : "ECS Service Average MemoryUtilized"
           }
         },
@@ -702,6 +705,8 @@ resource "aws_cloudwatch_dashboard" "main" {
               ["ECS/ContainerInsights", "CpuUtilized", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}"]
             ],
             "region" : "${var.region}",
+            "stat" : "Average",
+            "period" : 30,
             "title" : "ECS Service Average CpuUtilized"
           }
         },
@@ -718,6 +723,8 @@ resource "aws_cloudwatch_dashboard" "main" {
               ["ECS/ContainerInsights", "MemoryUtilized", "ServiceName", "${var.ecs_service_name}", "ClusterName", "${var.ecs_cluster_name}"]
             ],
             "region" : "${var.region}",
+            "stat" : "Average",
+            "period" : 30,
             "title" : "ECS Service Average MemoryUtilized"
           }
         },
@@ -735,6 +742,8 @@ resource "aws_cloudwatch_dashboard" "main" {
               [".", "NetworkTxBytes", ".", ".", ".", "."]
             ],
             "region" : "${var.region}",
+            "stat" : "Average",
+            "period" : 30,
             "title" : "ECS Service Network Metrics"
           }
         },
@@ -752,6 +761,8 @@ resource "aws_cloudwatch_dashboard" "main" {
               [".", "StorageWriteBytes", ".", ".", ".", "."]
             ],
             "region" : "${var.region}",
+            "stat" : "Average",
+            "period" : 30,
             "title" : "ECS Service Storage Metrics"
           }
         }
